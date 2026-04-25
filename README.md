@@ -1,6 +1,7 @@
 # plantify
 
 A Plant Care Assistant, AR-ready interfaces for identifying plants via camera.
+CC 105 Project
 
 ## Getting Started
 
