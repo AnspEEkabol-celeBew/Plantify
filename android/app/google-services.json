@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "723620515755",
+    "project_id": "plantifyapp-b5a8b",
+    "storage_bucket": "plantifyapp-b5a8b.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:723620515755:android:3cd0801a394d2ab871ccee",
+        "android_client_info": {
+          "package_name": "com.example.plantify"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA-E_FggiXN4-FJ3tltdZJ_iiDyxMH2Eso"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
