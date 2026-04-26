@@ -64,7 +64,9 @@ class _SetupScreenState extends State<SetupScreen> {
         'username': username,
         'birthdate': birthdate?.toString(),
         'age':age,
-        'createdAt': nowTemp.toString()
+        'createdAt': nowTemp.toString(),
+        'garden':'[]',
+        'reminder':'[]'
       };
 
     authResult = await firebaseAuthService.signUp(email, password);

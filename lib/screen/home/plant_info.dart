@@ -1,12 +1,17 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_maps/maps.dart';
 
+import '../../backend/firestore/firestore.dart';
+import '../../storage/preferences.dart';
 import '../../theme/colors.dart';
 import '../../theme/fonts.dart';
 import '../../util/appbar.dart';
 import '../../util/container.dart';
 import '../../util/image.dart';
 import '../../util/layout.dart';
+import '../../util/snackbar.dart';
 import '../../util/text.dart';
 import '../../util/worldmap.dart';
 
@@ -21,6 +26,62 @@ class PlantInfoScreen extends StatefulWidget {
 
 class _PlantInfoScreenState extends State<PlantInfoScreen> {
   late final Map<String, dynamic> plant = widget.plantData;
+
+  bool isInGarden(List<dynamic> gardenList, String plantId) {
+    for (int l=0;l<gardenList.length;l++) {
+      if (gardenList[l]['plant_id'] == plantId) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  void addPlantToGarden() async {
+    Map<String, dynamic> userDataTemp = await loadPreferencesOnMap('userData',{});
+    List<dynamic> plantList = json.decode(userDataTemp['garden']);
+    
+    debugPrint(plant['id']);
+
+    if (isInGarden(plantList, plant['id'])) {
+      showSnackBar("You already have this Plant!");
+      return;
+    }
+
+    plantList.add({
+      'plant_id': plant['id'],
+      'journal' : []
+    });
+    
+    userDataTemp['garden'] = json.encode(plantList);
+    savePreferencesOnMap('userData',userDataTemp);
+    updateToFirestore(userDataTemp);
+    showSnackBar("Plant added to Garden!");
+  }
+
+  void updateToFirestore(Map<String, dynamic> userData) {
+    FirestoreService firestoreService = FirestoreService();
+    firestoreService.updateWhere(collection: 'users', field: 'uuid', isEqualTo: userData['uuid'], newData: userData);
+  }
+
+  void showSnackBar(String message) {
+    showUtilSnackBar(
+      context,
+      duration: 2000,
+      animationDuration: 200,
+      color: colorAccent.cardDark,
+      boxShadow: [
+        BoxShadow(color: Color.fromRGBO(0, 0, 0, 0.3), blurRadius: 5),
+      ],
+      width: 300,
+      content: UtilText(
+        message,
+        align: TextAlign.center,
+        family: Fonts.defaultFontRegular,
+        color: colorAccent.primaryText,
+        size: 15,
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +108,21 @@ class _PlantInfoScreenState extends State<PlantInfoScreen> {
             ),
             PlantInfoHead(plant: plant),
             PlantInfoSub(plant: plant),
-            SizedBox(height: 80.0)
+            UtilContainer(
+              onTap: () => addPlantToGarden(),
+              height: 60,
+              width: double.maxFinite,
+              borderRadius: BorderRadius.circular(100),
+              color: colorAccent.secondary,
+              alignment: Alignment.center,
+              child: UtilText(
+                "Add to My Garden",
+                family: Fonts.defaultFontThin,
+                size: 18,
+                color: colorAccent.white,
+              ),
+            ),
+            SizedBox(height: 80.0),
           ],
         ),
       ),
@@ -103,7 +178,9 @@ class PlantInfoSub extends StatelessWidget {
             ),
             UtilContainer(
               margin: EdgeInsets.symmetric(vertical: 10.0),
-              child: DistributionMapChart(distributionData: plant['distribution']),
+              child: DistributionMapChart(
+                distributionData: plant['distribution'],
+              ),
             ),
             DistributionLegend(),
           ],
