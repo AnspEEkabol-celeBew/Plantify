@@ -10,6 +10,7 @@ import 'package:plantify/util/miscellaneous.dart';
 import 'package:plantify/util/navigation.dart';
 import 'package:plantify/util/text.dart';
 
+import '../../backend/firestore/firestore.dart';
 import '../../theme/colors.dart';
 import '../../theme/fonts.dart';
 
@@ -38,11 +39,9 @@ class _AccountScreenState extends State<AccountScreen> {
     });
   }
 
-
-
   @override
   Widget build(BuildContext context) {
-    final String username  = _userData['username'] as String? ?? '';
+    final String username = _userData['username'] as String? ?? '';
     final String email = _userData['email'] as String? ?? '';
     final int age = _userData['age'] as int? ?? 0;
 

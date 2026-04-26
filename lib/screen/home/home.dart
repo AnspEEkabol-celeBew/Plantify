@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:plantify/screen/home/plant_info.dart';
 import 'package:plantify/storage/preferences.dart';
 import 'package:plantify/theme/colors.dart';
 import 'package:plantify/util/container.dart';
 import 'package:plantify/util/layout.dart';
+import 'package:plantify/util/navigation.dart';
 import 'package:plantify/util/text.dart';
 
+import '../../main.dart';
+import '../../storage/plants.dart';
 import '../../theme/fonts.dart';
 import '../../util/image.dart';
 
@@ -39,6 +43,8 @@ class _HomeScreenState extends State<HomeScreen> {
     final String username  = _userData['username'] as String? ?? '';
     final String email = _userData['email'] as String? ?? '';
     final int age = _userData['age'] as int? ?? 0;
+
+    Plants plants = Plants();
 
     return SingleChildScrollView(
       child: UtilFlexBox(
@@ -220,40 +226,40 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
 
           //planty
-          UtilFlexBox(
-            onTap: () => {debugPrint("planty")},
-            margin: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-            padding: EdgeInsets.all(5),
-            width: double.maxFinite,
-            borderRadius: BorderRadius.circular(10),
-            direction: Axis.horizontal,
-            height: 150,
-            color: colorAccent.cardLight,
-            children: [
-              Image.asset('assets/images/misc/planty.png'),
-              Expanded(
-                child: UtilFlexBox(
-                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 10),
-                  direction: Axis.vertical,
-                  gap: 10,
-                  children: [
-                    UtilText(
-                      "Ask Planty",
-                      size: 25,
-                      family: Fonts.defaultFontMedium,
-                      color: colorAccent.primaryText,
-                    ),
-                    UtilText(
-                      "Our Planty is ready to help with your plant related problems and more!",
-                      size: 15,
-                      family: Fonts.defaultFontThin,
-                      color: colorAccent.secondaryText,
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
+          // UtilFlexBox(
+          //   onTap: () => {debugPrint("planty")},
+          //   margin: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+          //   padding: EdgeInsets.all(5),
+          //   width: double.maxFinite,
+          //   borderRadius: BorderRadius.circular(10),
+          //   direction: Axis.horizontal,
+          //   height: 150,
+          //   color: colorAccent.cardLight,
+          //   children: [
+          //     Image.asset('assets/images/misc/planty.png'),
+          //     Expanded(
+          //       child: UtilFlexBox(
+          //         padding: EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+          //         direction: Axis.vertical,
+          //         gap: 10,
+          //         children: [
+          //           UtilText(
+          //             "Ask Planty",
+          //             size: 25,
+          //             family: Fonts.defaultFontMedium,
+          //             color: colorAccent.primaryText,
+          //           ),
+          //           UtilText(
+          //             "Our Planty is ready to help with your plant related problems and more!",
+          //             size: 15,
+          //             family: Fonts.defaultFontThin,
+          //             color: colorAccent.secondaryText,
+          //           ),
+          //         ],
+          //       ),
+          //     ),
+          //   ],
+          // ),
 
           //explore plants
           UtilFlexBox(
@@ -272,40 +278,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 columns: 2,
                 gapX: 10,
                 gapY: 10,
-                children: [
-                  ExplorePlants(
-                    image: 'assets/images/misc/foilage.jpg',
-                    name: 'Foliage Plants'
-                  ),
-                  ExplorePlants(
-                    image: 'assets/images/misc/succulents.webp',
-                    name: 'Succulents and Cacti'
-                  ),
-                  ExplorePlants(
-                    image: 'assets/images/misc/flowering.jpg',
-                    name: 'Flowering Plants'
-                  ),
-                  ExplorePlants(
-                    image: 'assets/images/misc/epiphytes.jpg',
-                    name: 'Epiphytes'
-                  ),
-                  ExplorePlants(
-                    image: 'assets/images/misc/herbs.webp',
-                    name: 'Culinary Herbs'
-                  ),
-                  ExplorePlants(
-                    image: 'assets/images/misc/ferns.webp',
-                    name: 'Ferns'
-                  ),
-                  ExplorePlants(
-                    image: 'assets/images/misc/aquatic.webp',
-                    name: 'Aquatic Plants'
-                  ),
-                  ExplorePlants(
-                    image: 'assets/images/misc/carnivorous.jpg',
-                    name: 'Carnivorous Plants'
-                  ),
-                ],
+                children: plants.fromExplorePlants(),
               ),
             ],
           ),
@@ -319,18 +292,21 @@ class _HomeScreenState extends State<HomeScreen> {
 class ExplorePlants extends StatelessWidget {
   const ExplorePlants({
     super.key,
-    required this.image,
-    required this.name
+    required this.plantId
   });
 
-  final String image;
-  final String name;
+  final String plantId;
 
   @override
   Widget build(BuildContext context) {
+    final Plants plants = Plants();
+    Map<String, dynamic>? plantGet = plants.getPlantById(plantId);
+
     return UtilFitImage(
-      image,
-      onTap: ()=>debugPrint("more $name"),
+      plantGet?["image_url"],
+      onTap: () {
+        navigateTo(context, animationType: NavAnimation.slideUp, duration: preferredAnimations.getDuration(), page: PlantInfoScreen(plantData: plantGet?? {}));
+      },
       borderRadius: BorderRadius.circular(15),
       width: double.maxFinite,
       fit: BoxFit.cover,
@@ -348,7 +324,7 @@ class ExplorePlants extends StatelessWidget {
         width: double.maxFinite,
         height: double.maxFinite,
         child: UtilText(
-          name,
+          plantGet?["plant_name"]?? "null",
           family: Fonts.defaultFontRegular,
           color: colorAccent.white,
           size: 18,

@@ -30,12 +30,7 @@ class _AccessibilityScreenState extends State<AccessibilityScreen> {
       appBar: subAppbarModifyLeading(
         title: "Ease & Accessibility",
         leading: UtilContainer(
-          onTap: () => navigateTo(
-            context,
-            animationType: NavAnimation.slideRight,
-            duration: preferredAnimations.getDuration(),
-            page: MainHomeScreen(),
-          ),
+          onTap: () => Navigator.pop(context),
           child: Icon(Icons.arrow_back),
         ),
       ),

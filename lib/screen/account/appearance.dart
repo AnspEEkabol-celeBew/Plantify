@@ -30,12 +30,7 @@ class _AppearanceScreenState extends State<AppearanceScreen> {
         appBar: subAppbarModifyLeading(
           title: "Appearance",
           leading: UtilContainer(
-            onTap: () => navigateTo(
-              context,
-              animationType: NavAnimation.slideRight,
-              duration: preferredAnimations.getDuration(),
-              page: MainHomeScreen(),
-            ),
+            onTap: () => Navigator.pop(context),
             child: Icon(Icons.arrow_back),
           ),
         ),
