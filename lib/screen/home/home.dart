@@ -44,8 +44,6 @@ class _HomeScreenState extends State<HomeScreen> {
     final String email = _userData['email'] as String? ?? '';
     final int age = _userData['age'] as int? ?? 0;
 
-    Plants plants = Plants();
-
     return SingleChildScrollView(
       child: UtilFlexBox(
         gap: 5,
@@ -299,7 +297,6 @@ class ExplorePlants extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Plants plants = Plants();
     Map<String, dynamic>? plantGet = plants.getPlantById(plantId);
 
     return UtilFitImage(

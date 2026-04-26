@@ -1,11 +1,16 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:plantify/storage/preferences.dart';
 import 'package:plantify/theme/colors.dart';
 import 'package:plantify/util/container.dart';
 import 'package:plantify/util/form.dart';
 import 'package:plantify/util/image.dart';
 import 'package:plantify/util/layout.dart';
+import 'package:plantify/util/string.dart';
 import 'package:plantify/util/text.dart';
 
+import '../../storage/plants.dart';
 import '../../theme/fonts.dart';
 
 class GardenScreen extends StatefulWidget {
@@ -16,23 +21,52 @@ class GardenScreen extends StatefulWidget {
 }
 
 class _GardenScreenState extends State<GardenScreen> {
-  FlowerCondition flowerCondition = FlowerCondition();
+  List<dynamic> gardenList = [];
+  List<dynamic> _filteredList = []; // ✅ separate display list
+  String _searchQuery = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadGarden();
+  }
+
+  Future<void> _loadGarden() async {
+    Map<String, dynamic> userData = await loadPreferencesOnMap('userData', {});
+    final list = json.decode(userData['garden']);
+    setState(() {
+      gardenList = list;
+      _filteredList = list;
+    });
+    debugPrint(gardenList.toString());
+  }
+
+  void _onSearchChanged(String value) {
+    final str = value.trim().toLowerCase();
+    setState(() {
+      _searchQuery = str;
+      _filteredList = str.isEmpty
+          ? gardenList  // ✅ restore full list when search is cleared
+          : gardenList.where((g) =>
+              plants.getPlantById(g['plant_id'])?['plant_name']
+                  .toLowerCase()
+                  .contains(str) ?? false
+            ).toList();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return UtilFlexBox(
       direction: Axis.vertical,
       children: [
-        //header - searchbox, filter
         UtilFlexBox(
           padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
           width: double.infinity,
           direction: Axis.vertical,
-          height: 140,
+          height: 80,
           gap: 12,
           children: [
-
-            //searchbox
             UtilInputBox(
               width: double.maxFinite,
               height: 50,
@@ -42,186 +76,83 @@ class _GardenScreenState extends State<GardenScreen> {
               hint: "Search your plants ...",
               fonts: Fonts.defaultFontExtraLight,
               textColor: colorAccent.primaryText,
+              onChanged: _onSearchChanged, // ✅ use the fixed handler
             ),
-
-            //filter
-            UtilFlexBox(
-              direction: Axis.horizontal,
-              width: double.maxFinite,
-              height: 50,
-              borderRadius: BorderRadius.circular(15),
-              color: colorAccent.cardDark,
-              children: [
-                Expanded(
-                  child: UtilContainer(
-                    alignment: Alignment.center,
-                    color: colorAccent.secondary,
-                    borderRadius: BorderRadius.only(topLeft: Radius.circular(15), bottomLeft: Radius.circular(15)),
-                    child: UtilText(
-                      "All",
-                      family: Fonts.defaultFontThin,
-                      color: colorAccent.primaryText,
-                      size: 15,
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: UtilContainer(
-                    alignment: Alignment.center,
-                    color: Colors.transparent,
-                    child: UtilText(
-                      "Healthy",
-                      family: Fonts.defaultFontThin,
-                      color: colorAccent.primaryText,
-                      size: 15,
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: UtilContainer(
-                    alignment: Alignment.center,
-                    color: Colors.transparent,
-                    child: UtilText(
-                      "Needs Water",
-                      family: Fonts.defaultFontThin,
-                      color: colorAccent.primaryText,
-                      size: 15,
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: UtilContainer(
-                    alignment: Alignment.center,
-                    color: Colors.transparent,
-                    child: UtilText(
-                      "Overdue",
-                      family: Fonts.defaultFontThin,
-                      color: colorAccent.primaryText,
-                      size: 15,
-                    ),
-                  ),
-                ),
-              ],
-            )
           ],
         ),
 
-        //garden
         Expanded(
-          child: SingleChildScrollView(
-            scrollDirection: Axis.vertical,
-            child: UtilGridBox(
-              margin: EdgeInsets.symmetric(horizontal: 20),
-              columns: 2,
-              gapX: 12,
-              gapY: 12,
-              childAspectRatio: 0.8,
-              children: [
-                FlowersList(
-                  name: "Hibiscus",
-                  image: 'assets/images/misc/hibiscus.jpg',
-                  nextWatering: 'March 28',
-                  condition: flowerCondition.needsWater
+          child: _filteredList.isNotEmpty  // ✅ use _filteredList for display
+              ? SingleChildScrollView(
+                  scrollDirection: Axis.vertical,
+                  child: UtilGridBox(
+                    margin: EdgeInsets.symmetric(horizontal: 20),
+                    columns: 2,
+                    gapX: 12,
+                    gapY: 12,
+                    childAspectRatio: 0.8,
+                    children: List.generate(
+                      _filteredList.length,
+                      (i) => FlowersList(gardenData: _filteredList[i]),
+                    ),
+                  ),
+                )
+              : Center(
+                  child: UtilText(
+                    gardenList.isEmpty
+                        ? "The Garden is Empty!"   // no data at all
+                        : "No plants found.",      // search returned nothing
+                    size: 20,
+                    family: Fonts.defaultFontRegular,
+                    color: colorAccent.secondaryText,
+                  ),
                 ),
-                FlowersList(
-                  name: "Cycads",
-                  image: 'assets/images/misc/cycad.jpg',
-                  nextWatering: 'March 8',
-                  condition: flowerCondition.healthy
-                ),
-                FlowersList(
-                  name: "Juniper",
-                  image: 'assets/images/misc/juniper.jpg',
-                  nextWatering: 'April 22',
-                  condition: flowerCondition.healthy
-                ),
-                FlowersList(
-                  name: "Peace Plant",
-                  image: 'assets/images/misc/peace_plant.jpg',
-                  nextWatering: 'March 12',
-                  condition: flowerCondition.overdue
-                ),
-                FlowersList(
-                  name: "Sunflower",
-                  image: 'assets/images/misc/sunflower.jpg',
-                  nextWatering: 'April 1',
-                  condition: flowerCondition.healthy
-                ),
-              ],
-            ),
-          ),
-        )
+        ),
       ],
     );
   }
 }
 
-class FlowerCondition {
-  Map<String, Color> healthy = {"Healthy": colorAccent.colorHealthy};
-  Map<String, Color> needsWater = {"Needs Water": colorAccent.colorNeedsWater};
-  Map<String, Color> overdue = {"Overdue": colorAccent.colorOverdue};
-}
-
 class FlowersList extends StatelessWidget {
-  const FlowersList({
-    super.key,
-    required this.name,
-    required this.image,
-    required this.nextWatering,
-    required this.condition,
-  });
+  const FlowersList({super.key, required this.gardenData});
 
-  final String name;
-  final String image;
-  final String nextWatering;
-  final Map<String, Color> condition;
+  final Map<String, dynamic> gardenData;
 
   @override
   Widget build(BuildContext context) {
+    String pid = gardenData['plant_id'];
+    Map<String, dynamic>? plant = plants.getPlantById(pid);
+    debugPrint(gardenData.toString());
     return UtilFlexBox(
       borderRadius: BorderRadius.circular(15),
       color: colorAccent.cardLight,
       gap: 5,
       children: [
         UtilFitImage(
-          image,
-          borderRadius: BorderRadius.only(topLeft: Radius.circular(15), topRight: Radius.circular(15)),
+          plant?['image_url'],
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(15),
+            topRight: Radius.circular(15),
+          ),
           height: 140,
         ),
         UtilFlexBox(
           margin: EdgeInsets.symmetric(horizontal: 7),
           children: [
             UtilText(
-              name,
+              plant?['plant_name'],
               family: Fonts.defaultFontMedium,
               color: colorAccent.primaryText,
               size: 18,
             ),
             UtilText(
-              "Next Watering: $nextWatering",
+              "${gardenData['journal'].length} Journal${gardenData['journal'].length > 0 ? "s" : ""}",
               family: Fonts.defaultFontExtraLight,
               color: colorAccent.secondaryText,
               size: 13,
             ),
-            UtilFlexBox(
-              direction: Axis.horizontal,
-              children: [
-                UtilText(
-                  "Condition: ",
-                  family: Fonts.defaultFontExtraLight,
-                  color: colorAccent.secondaryText,
-                  size: 13,
-                ),
-                UtilText(
-                  condition.keys.first,
-                  family: Fonts.defaultFontExtraLight,
-                  color: condition.values.first,
-                  size: 13,
-                ),
-              ],
-            )
           ],
-        )
+        ),
       ],
     );
   }

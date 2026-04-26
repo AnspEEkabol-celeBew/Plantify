@@ -588,3 +588,5 @@ class Plants {
       : null;
   }
 }
+
+Plants plants = Plants();
