@@ -140,3 +140,7 @@ String generateUsername() {
   ];
   return "${first[randomInt(0, first.length-1)]} ${second[randomInt(0, second.length-1)]}";
 }
+
+String removeIdFromLabel(String label) {//1 name
+  return label.substring(label.indexOf(" ")+1,label.length);
+}

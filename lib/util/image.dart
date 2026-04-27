@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 
 class UtilFitImage extends StatelessWidget {
@@ -131,12 +133,13 @@ class UtilFitImage extends StatelessWidget {
   }
 }
 
-class UtilFitImageNetwork extends StatelessWidget {
-  final String imagePath;
+class UtilFitImageFile extends StatelessWidget {
+  final File imagePath;
 
   // Size
   final double? width;
   final double? height;
+  final bool gaplessPlayback;
 
   // Image fit
   final BoxFit fit;
@@ -163,11 +166,12 @@ class UtilFitImageNetwork extends StatelessWidget {
   final VoidCallback? onTap;
   final VoidCallback? onLongPress;
 
-  const UtilFitImageNetwork(
+  const UtilFitImageFile(
     this.imagePath, {
     super.key,
     this.width,
     this.height,
+    this.gaplessPlayback = false,
     this.fit = BoxFit.cover,
 
     this.margin,
@@ -194,8 +198,9 @@ class UtilFitImageNetwork extends StatelessWidget {
     // 🖼️ Base image
     Widget image = ClipRRect(
       borderRadius: borderRadius ?? BorderRadius.zero,
-      child: Image.network(
+      child: Image.file(
         imagePath,
+        gaplessPlayback: gaplessPlayback,
         width: width,
         height: height,
         fit: fit,

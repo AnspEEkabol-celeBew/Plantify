@@ -80,9 +80,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 size: 20,
               ),
               UtilFlexBox(
-                onTap: () {
-
-                },
                 main: MainAxisAlignment.center,
                 padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
                 direction: Axis.horizontal,

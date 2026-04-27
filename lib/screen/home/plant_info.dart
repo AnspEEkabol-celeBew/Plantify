@@ -252,13 +252,13 @@ class PlantInfoSub extends StatelessWidget {
               color: colorAccent.secondaryText,
             ),
             UtilText(
-              "Intensity: ${plant["toxicity"]['toxic_to']}",
+              "Toxic to: ${plant["toxicity"]['toxic_to']}",
               size: 18,
               family: Fonts.defaultFontRegular,
               color: colorAccent.secondaryText,
             ),
             UtilText(
-              "Intensity: ${plant["toxicity"]['toxic_parts']}",
+              "Toxic Parts: ${plant["toxicity"]['toxic_parts']}",
               size: 18,
               family: Fonts.defaultFontRegular,
               color: colorAccent.secondaryText,
