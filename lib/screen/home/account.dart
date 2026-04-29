@@ -45,117 +45,115 @@ class _AccountScreenState extends State<AccountScreen> {
     final String email = _userData['email'] as String? ?? '';
     final int age = _userData['age'] as int? ?? 0;
 
-    return ReactiveBuilder(
-      builder: () => SingleChildScrollView(
-        child: UtilFlexBox(
-          margin: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-          gap: 10,
-          children: [
-            //account header
-            UtilFlexBox(
-              cross: CrossAxisAlignment.center,
-              direction: Axis.horizontal,
-              width: double.maxFinite,
-              gap: 10,
-              height: 100,
-              children: [
-                UtilFitImage(
-                  'assets/images/misc/profile_sample.jpeg',
-                  borderRadius: BorderRadius.circular(500),
-                  height: 80,
-                  width: 80,
+    return SingleChildScrollView(
+      child: UtilFlexBox(
+        margin: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        gap: 10,
+        children: [
+          //account header
+          UtilFlexBox(
+            cross: CrossAxisAlignment.center,
+            direction: Axis.horizontal,
+            width: double.maxFinite,
+            gap: 10,
+            height: 100,
+            children: [
+              UtilFitImage(
+                'assets/images/misc/profile_sample.jpeg',
+                borderRadius: BorderRadius.circular(500),
+                height: 80,
+                width: 80,
+              ),
+              Expanded(
+                child: UtilFlexBox(
+                  direction: Axis.vertical,
+                  padding: EdgeInsets.symmetric(vertical: 10),
+                  gap: 2,
+                  children: [
+                    UtilText(
+                      username,
+                      family: Fonts.defaultFontSemiBold,
+                      color: colorAccent.primaryText,
+                      size: 28,
+                    ),
+                    UtilText(
+                      email,
+                      family: Fonts.defaultFontThin,
+                      color: colorAccent.secondaryText,
+                      size: 12,
+                    ),
+                  ],
                 ),
-                Expanded(
-                  child: UtilFlexBox(
-                    direction: Axis.vertical,
-                    padding: EdgeInsets.symmetric(vertical: 10),
-                    gap: 2,
-                    children: [
-                      UtilText(
-                        username,
-                        family: Fonts.defaultFontSemiBold,
-                        color: colorAccent.primaryText,
-                        size: 28,
-                      ),
-                      UtilText(
-                        email,
-                        family: Fonts.defaultFontThin,
-                        color: colorAccent.secondaryText,
-                        size: 12,
-                      ),
-                    ],
-                  ),
-                ),
-                Icon(
-                  Icons.navigate_next_rounded,
-                  size: 50,
-                  color: colorAccent.primaryText,
-                ),
-              ],
-            ),
+              ),
+              Icon(
+                Icons.navigate_next_rounded,
+                size: 50,
+                color: colorAccent.primaryText,
+              ),
+            ],
+          ),
 
-            //settings list
-            UtilFlexBox(
-              margin: EdgeInsets.symmetric(vertical: 10),
-              direction: Axis.vertical,
-              gap: 10,
-              children: [
-                SettingList(
-                  icon: Icons.notifications_none_rounded,
-                  name: 'Notifications',
+          //settings list
+          UtilFlexBox(
+            margin: EdgeInsets.symmetric(vertical: 10),
+            direction: Axis.vertical,
+            gap: 10,
+            children: [
+              SettingList(
+                icon: Icons.notifications_none_rounded,
+                name: 'Notifications',
+              ),
+              SettingList(
+                icon: Icons.bookmark_border_rounded,
+                name: 'Bookmarks',
+              ),
+              SettingList(
+                icon: Icons.lock_outline_rounded,
+                name: 'Security & Privacy',
+              ),
+              SettingList(
+                icon: Icons.color_lens_outlined,
+                name: 'Appearance & Personalization',
+                onTap: () => navigateTo(
+                  context,
+                  animationType: NavAnimation.slideLeft,
+                  duration: preferredAnimations.getDuration(),
+                  page: AppearanceScreen(),
                 ),
-                SettingList(
-                  icon: Icons.bookmark_border_rounded,
-                  name: 'Bookmarks',
+              ),
+              SettingList(
+                icon: Icons.accessibility_new_outlined,
+                name: 'Ease & Accessibility',
+                onTap: () => navigateTo(
+                  context,
+                  animationType: NavAnimation.slideLeft,
+                  duration: preferredAnimations.getDuration(),
+                  page: AccessibilityScreen(),
                 ),
-                SettingList(
-                  icon: Icons.lock_outline_rounded,
-                  name: 'Security & Privacy',
-                ),
-                SettingList(
-                  icon: Icons.color_lens_outlined,
-                  name: 'Appearance & Personalization',
-                  onTap: () => navigateTo(
+              ),
+              SettingList(
+                icon: Icons.help_outline_rounded,
+                name: 'Help & Support',
+              ),
+              SettingList(
+                icon: Icons.logout,
+                name: 'Logout',
+                color: colorAccent.error,
+                onTap: () {
+                  deletePreferences('userData');
+                  savePreferencesOnBool('isLogin', false);
+
+                  navigateTo(
                     context,
                     animationType: NavAnimation.slideLeft,
                     duration: preferredAnimations.getDuration(),
-                    page: AppearanceScreen(),
-                  ),
-                ),
-                SettingList(
-                  icon: Icons.accessibility_new_outlined,
-                  name: 'Ease & Accessibility',
-                  onTap: () => navigateTo(
-                    context,
-                    animationType: NavAnimation.slideLeft,
-                    duration: preferredAnimations.getDuration(),
-                    page: AccessibilityScreen(),
-                  ),
-                ),
-                SettingList(
-                  icon: Icons.help_outline_rounded,
-                  name: 'Help & Support',
-                ),
-                SettingList(
-                  icon: Icons.logout,
-                  name: 'Logout',
-                  color: colorAccent.error,
-                  onTap: () {
-                    deletePreferences('userData');
-                    savePreferencesOnBool('isLogin', false);
-
-                    navigateTo(
-                      context,
-                      animationType: NavAnimation.slideLeft,
-                      duration: preferredAnimations.getDuration(),
-                      page: GetStartedScreen(),
-                    );
-                  },
-                ),
-              ],
-            ),
-          ],
-        ),
+                    page: GetStartedScreen(),
+                  );
+                },
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

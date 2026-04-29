@@ -10,8 +10,11 @@ import 'package:plantify/util/layout.dart';
 import 'package:plantify/util/string.dart';
 import 'package:plantify/util/text.dart';
 
+import '../../main.dart';
 import '../../storage/plants.dart';
 import '../../theme/fonts.dart';
+import '../../util/navigation.dart';
+import 'my_plant.dart';
 
 class GardenScreen extends StatefulWidget {
   const GardenScreen({super.key});
@@ -22,7 +25,7 @@ class GardenScreen extends StatefulWidget {
 
 class _GardenScreenState extends State<GardenScreen> {
   List<dynamic> gardenList = [];
-  List<dynamic> _filteredList = []; // ✅ separate display list
+  List<dynamic> _filteredList = [];
   String _searchQuery = '';
 
   @override
@@ -124,6 +127,12 @@ class FlowersList extends StatelessWidget {
     Map<String, dynamic>? plant = plants.getPlantById(pid);
     debugPrint(gardenData.toString());
     return UtilFlexBox(
+      onTap: () => navigateTo(
+        context,
+        animationType: NavAnimation.slideUp,
+        duration: preferredAnimations.getDuration(),
+        page: MyPlantScreen(gardenData: gardenData),
+      ),
       borderRadius: BorderRadius.circular(15),
       color: colorAccent.cardLight,
       gap: 5,

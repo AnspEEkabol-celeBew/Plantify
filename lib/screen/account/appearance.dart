@@ -12,6 +12,7 @@ import 'package:plantify/util/navigation.dart';
 
 import '../../theme/fonts.dart';
 import '../../util/list.dart';
+import '../../util/snackbar.dart';
 import '../../util/text.dart';
 
 class AppearanceScreen extends StatefulWidget {
@@ -55,12 +56,33 @@ class _AppearanceScreenState extends State<AppearanceScreen> {
                   onChanged: (val) {
                     darkMode.value = val;
                     savePreferencesOnBool("isDarkMode", darkMode.value);
+                    _showSnackBar("Restart to take changes");
                   },
                 ),
               )
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  void _showSnackBar(String message) {
+    showUtilSnackBar(
+      context,
+      duration: 2000,
+      animationDuration: 200,
+      color: colorAccent.cardDark,
+      boxShadow: [
+        BoxShadow(color: Color.fromRGBO(0, 0, 0, 0.3), blurRadius: 5),
+      ],
+      width: 300,
+      content: UtilText(
+        message,
+        align: TextAlign.center,
+        family: Fonts.defaultFontRegular,
+        color: colorAccent.primaryText,
+        size: 15,
       ),
     );
   }

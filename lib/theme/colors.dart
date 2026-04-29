@@ -81,6 +81,18 @@ class ColorAccent {
   Color get unreported =>
       darkMode.value ? darken(Color(0xff9E9E9E), 0.1) : Color(0xff9E9E9E);
 
+  Color get watering =>
+      darkMode.value ? darken(Color(0xFF2196F3), 0.1) : Color(0xFF2196F3);
+
+  Color get fertilizing =>
+      darkMode.value ? darken(Color(0xFFE65100), 0.1) : Color(0xFFE65100);
+
+  Color get trimming =>
+      darkMode.value ? darken(Color(0xFF4CAF50), 0.1) : Color(0xFF4CAF50);
+
+  Color get notes =>
+      darkMode.value ? darken(Color(0xFFE53935), 0.1) : Color(0xFFE53935);
+
   Color get cameraMaskBlack => Color.fromRGBO(0, 0, 0, 0.5);
 }
 

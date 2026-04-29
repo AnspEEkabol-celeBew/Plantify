@@ -641,7 +641,7 @@ class Plants {
       "genus": "Mussaenda",
       "family": "Rubiaceae",
       "scientific_name": "Mussaenda erythrophylla",
-      "image_url": "assets/images/plants/redmussaendaqueen.jpg",
+      "image_url": "assets/images/plants/resmussaendaqueen.jpg",
       "label_name": "redmussaendaqueen",
       "description": {
         "general":
@@ -1473,7 +1473,7 @@ class Plants {
       "genus": "Leucaena",
       "family": "Fabaceae",
       "scientific_name": "Leucaena leucocephala",
-      "image_url": "assets/images/plants/ipilipil",
+      "image_url": "assets/images/plants/ipilipil.jpg",
       "label_name": "ipilipil",
       "description": {
         "general":
@@ -1704,7 +1704,7 @@ class Plants {
       "genus": "Calamus",
       "family": "Arecaceae",
       "scientific_name": "Calamus rotang",
-      "image_url": "assets/images/plants/rattan.jpg",
+      "image_url": "assets/images/plants/ratan.jpg",
       "label_name": "rattan",
       "description": {
         "general":

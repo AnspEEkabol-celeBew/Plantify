@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:plantify/util/text.dart';
+
+import '../theme/colors.dart';
+import '../theme/fonts.dart';
 
 enum SnackBarAnimation {
   slideUp,
@@ -18,7 +22,6 @@ void showUtilSnackBar(
   // timing
   int duration = 3000,
   int animationDuration = 300, // 🔥 NEW
-
   // layout
   EdgeInsetsGeometry? margin,
   EdgeInsetsGeometry? padding,
@@ -34,7 +37,6 @@ void showUtilSnackBar(
   // position
   bool top = false,
   Offset? offset, // 🔥 NEW
-
   // animation
   SnackBarAnimation animation = SnackBarAnimation.slideUp,
   Curve curve = Curves.easeOut, // 🔥 NEW
@@ -132,10 +134,7 @@ class _UtilSnackbarWidgetState extends State<_UtilSnackbarWidget>
       duration: Duration(milliseconds: widget.animationDuration),
     );
 
-    final curved = CurvedAnimation(
-      parent: controller,
-      curve: widget.curve,
-    );
+    final curved = CurvedAnimation(parent: controller, curve: widget.curve);
 
     fade = Tween(begin: 0.0, end: 1.0).animate(curved);
     scale = Tween(begin: 0.8, end: 1.0).animate(curved);
@@ -160,10 +159,7 @@ class _UtilSnackbarWidgetState extends State<_UtilSnackbarWidget>
         beginOffset = const Offset(0, 1);
     }
 
-    slide = Tween<Offset>(
-      begin: beginOffset,
-      end: Offset.zero,
-    ).animate(curved);
+    slide = Tween<Offset>(begin: beginOffset, end: Offset.zero).animate(curved);
 
     controller.forward();
 
