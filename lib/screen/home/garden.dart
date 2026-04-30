@@ -125,7 +125,7 @@ class FlowersList extends StatelessWidget {
   Widget build(BuildContext context) {
     String pid = gardenData['plant_id'];
     Map<String, dynamic>? plant = plants.getPlantById(pid);
-    debugPrint(gardenData.toString());
+    int journals = gardenData['journal'].length;
     return UtilFlexBox(
       onTap: () => navigateTo(
         context,
@@ -155,7 +155,7 @@ class FlowersList extends StatelessWidget {
               size: 18,
             ),
             UtilText(
-              "${gardenData['journal'].length} Journal${gardenData['journal'].length > 0 ? "s" : ""}",
+              "${journals == 0? "No" : journals} Journal${journals > 0 ? "s" : ""}",
               family: Fonts.defaultFontExtraLight,
               color: colorAccent.secondaryText,
               size: 13,

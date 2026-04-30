@@ -144,3 +144,7 @@ String generateUsername() {
 String removeIdFromLabel(String label) {//1 name
   return label.substring(label.indexOf(" ")+1,label.length);
 }
+
+void utilDebugPrint(dynamic val) {
+  debugPrint(val.toString());
+}
