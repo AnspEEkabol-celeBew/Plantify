@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:plantify/backend/weather/weather_service.dart';
 import 'package:plantify/screen/home/plant_info.dart';
 import 'package:plantify/storage/preferences.dart';
 import 'package:plantify/theme/colors.dart';
@@ -8,6 +9,8 @@ import 'package:plantify/util/layout.dart';
 import 'package:plantify/util/navigation.dart';
 import 'package:plantify/util/text.dart';
 
+import '../../backend/weather/weather_preferences.dart';
+import '../../backend/weather/weather_screen.dart';
 import '../../main.dart';
 import '../../storage/plants.dart';
 import '../../theme/fonts.dart';
@@ -22,13 +25,35 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   Map<String, dynamic> _userData = {};
+  WeatherData? _weatherData;
+  bool _weatherLoading = true;
 
   @override
   void initState() {
     super.initState();
+    _loadWeather();
+    _loadUserData();
+    _loadWeather();
     setState(() {
       _loadUserData();
     });
+  }
+
+  Future<void> _loadWeather() async {
+    try {
+      final loc = await loadWeatherLocation();
+      final data = await WeatherService.instance.getWeather(
+        latitude: loc.latitude,
+        longitude: loc.longitude,
+        locationName: loc.name,
+      );
+      setState(() {
+        _weatherData = data;
+        _weatherLoading = false;
+      });
+    } catch (_) {
+      setState(() => _weatherLoading = false);
+    }
   }
 
   Future<void> _loadUserData() async {
@@ -69,60 +94,63 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
 
           //weather
-          UtilFlexBox(
-            margin: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-            gap: 10,
-            children: [
-              UtilText(
-                "Weather Today",
-                color: colorAccent.primaryText,
-                family: Fonts.defaultFontMedium,
-                size: 20,
-              ),
-              UtilFlexBox(
-                main: MainAxisAlignment.center,
-                padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-                direction: Axis.horizontal,
-                width: double.infinity,
-                height: 130,
-                color: colorAccent.cardLight,
-                borderRadius: BorderRadius.circular(10.0),
-                children: [
-                  Expanded(
-                    child: UtilFlexBox(
-                      direction: Axis.vertical,
-                      children: [
-                        UtilText(
-                          "Ipil, Philippines",
-                          size: 16,
-                          prefix: Icon(Icons.location_on, color: colorAccent.primaryText),
-                          family: Fonts.defaultFontExtraLight,
-                          color: colorAccent.primaryText,
-                        ),
-                        UtilText(
-                          "67 °C",
-                          size: 40,
-                          family: Fonts.defaultFontMedium,
-                          color: colorAccent.primaryText,
-                        ),
-                        UtilText(
-                          "Humidity 67%",
-                          size: 15,
-                          family: Fonts.defaultFontExtraLight,
-                          color: colorAccent.primaryText,
-                        ),
-                      ],
-                    ),
-                  ),
-                  SvgPicture.asset(
-                    'assets/images/icons/svg/sunny.svg',
-                    colorFilter: ColorFilter.mode(colorAccent.secondary, BlendMode.srcIn)
-                  )
-                ],
-              ),
-            ],
+          // UtilFlexBox(
+          //   margin: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+          //   gap: 10,
+          //   children: [
+          //     UtilText(
+          //       "Weather Today",
+          //       color: colorAccent.primaryText,
+          //       family: Fonts.defaultFontMedium,
+          //       size: 20,
+          //     ),
+          //     UtilFlexBox(
+          //       main: MainAxisAlignment.center,
+          //       padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+          //       direction: Axis.horizontal,
+          //       width: double.infinity,
+          //       height: 130,
+          //       color: colorAccent.cardLight,
+          //       borderRadius: BorderRadius.circular(10.0),
+          //       children: [
+          //         Expanded(
+          //           child: UtilFlexBox(
+          //             direction: Axis.vertical,
+          //             children: [
+          //               UtilText(
+          //                 "Ipil, Philippines",
+          //                 size: 16,
+          //                 prefix: Icon(Icons.location_on, color: colorAccent.primaryText),
+          //                 family: Fonts.defaultFontExtraLight,
+          //                 color: colorAccent.primaryText,
+          //               ),
+          //               UtilText(
+          //                 "67 °C",
+          //                 size: 40,
+          //                 family: Fonts.defaultFontMedium,
+          //                 color: colorAccent.primaryText,
+          //               ),
+          //               UtilText(
+          //                 "Humidity 67%",
+          //                 size: 15,
+          //                 family: Fonts.defaultFontExtraLight,
+          //                 color: colorAccent.primaryText,
+          //               ),
+          //             ],
+          //           ),
+          //         ),
+          //         SvgPicture.asset(
+          //           'assets/images/icons/svg/sunny.svg',
+          //           colorFilter: ColorFilter.mode(colorAccent.secondary, BlendMode.srcIn)
+          //         )
+          //       ],
+          //     ),
+          //   ],
+          // ),
+          HomeWeatherCard(
+            weatherData: _weatherData,
+            loading: _weatherLoading,
           ),
-
           //article
           UtilFlexBox(
             direction: Axis.vertical,
@@ -323,6 +351,129 @@ class ExplorePlants extends StatelessWidget {
           color: colorAccent.white,
           size: 18,
         ),
+      ),
+    );
+  }
+}
+
+class HomeWeatherCard extends StatelessWidget {
+  final WeatherData? weatherData;
+  final bool loading;
+
+  const HomeWeatherCard({
+    super.key,
+    required this.weatherData,
+    required this.loading,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return UtilFlexBox(
+      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+      gap: 10,
+      children: [
+        UtilText(
+          "Weather Today",
+          color: colorAccent.primaryText,
+          family: Fonts.defaultFontMedium,
+          size: 20,
+        ),
+        UtilFlexBox(
+          onTap: loading || weatherData == null
+              ? null
+              : () => navigateTo(
+                    context,
+                    animationType: NavAnimation.slideUp,
+                    duration: preferredAnimations.getDuration(),
+                    page: const WeatherScreen(),
+                  ),
+          main: MainAxisAlignment.center,
+          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+          direction: Axis.horizontal,
+          width: double.infinity,
+          height: 130,
+          color: colorAccent.cardLight,
+          borderRadius: BorderRadius.circular(10.0),
+          children: [
+            Expanded(
+              child: loading
+                  ? UtilFlexBox(
+                      gap: 8,
+                      children: [
+                        _shimmer(width: 120, height: 14),
+                        _shimmer(width: 80, height: 36),
+                        _shimmer(width: 100, height: 12),
+                      ],
+                    )
+                  : weatherData == null
+                      ? UtilText(
+                          "Weather unavailable",
+                          size: 14,
+                          family: Fonts.defaultFontExtraLight,
+                          color: colorAccent.secondaryText,
+                        )
+                      : UtilFlexBox(
+                          direction: Axis.vertical,
+                          gap: 2,
+                          children: [
+                            UtilText(
+                              weatherData!.locationName,
+                              size: 16,
+                              prefix: Icon(Icons.location_on,
+                                  color: colorAccent.primaryText, size: 18),
+                              family: Fonts.defaultFontExtraLight,
+                              color: colorAccent.primaryText,
+                            ),
+                            UtilText(
+                              "${weatherData!.today.tempC.round()} °C",
+                              size: 40,
+                              family: Fonts.defaultFontMedium,
+                              color: colorAccent.primaryText,
+                            ),
+                            UtilText(
+                              "Humidity ${weatherData!.today.humidity}%",
+                              size: 15,
+                              family: Fonts.defaultFontExtraLight,
+                              color: colorAccent.primaryText,
+                            ),
+                          ],
+                        ),
+            ),
+            if (!loading && weatherData != null)
+              SvgPicture.asset(
+                weatherData!.today.condition.svgAsset,
+                width: 75,
+                height: 75,
+                colorFilter: ColorFilter.mode(
+                    colorAccent.secondary, BlendMode.srcIn),
+              )
+            else if (loading)
+              _shimmerCircle(size: 75),
+          ],
+        ),
+      ],
+    );
+  }
+
+  // Tiny shimmer placeholders while loading
+  Widget _shimmer({required double width, required double height}) {
+    return Container(
+      width: width,
+      height: height,
+      decoration: BoxDecoration(
+        color: Colors.grey.withOpacity(0.2),
+        borderRadius: BorderRadius.circular(6),
+      ),
+    );
+  }
+
+  Widget _shimmerCircle({required double size}) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: Colors.grey.withOpacity(0.2),
+        shape: BoxShape.circle,
       ),
     );
   }

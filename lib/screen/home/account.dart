@@ -84,12 +84,7 @@ class _AccountScreenState extends State<AccountScreen> {
                     ),
                   ],
                 ),
-              ),
-              Icon(
-                Icons.navigate_next_rounded,
-                size: 50,
-                color: colorAccent.primaryText,
-              ),
+              )
             ],
           ),
 
