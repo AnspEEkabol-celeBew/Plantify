@@ -16,8 +16,8 @@ import '../../main.dart';
 import '../../storage/plants.dart';
 import '../../theme/fonts.dart';
 import '../../util/image.dart';
-import '../article/article.dart';
 import '../article/article_screen.dart';
+import '../article/article_services.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -30,14 +30,14 @@ class _HomeScreenState extends State<HomeScreen> {
   Map<String, dynamic> _userData = {};
   WeatherData? _weatherData;
   bool _weatherLoading = true;
-  List<ArticleData> _articles = [];
+  List<PlantArticle> _articles = [];
+  bool _articlesLoading = true;
 
   @override
   void initState() {
     super.initState();
     _loadWeather();
     _loadUserData();
-    _loadWeather();
     _loadArticles();
     setState(() {
       _loadUserData();
@@ -62,10 +62,13 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _loadArticles() async {
-    final articles = await ArticleService.getArticles();
-    setState(() {
-      _articles = articles;
-    });
+    final articles = await ArticleService.loadArticles();
+    if (mounted) {
+      setState(() {
+        _articles = articles;
+        _articlesLoading = false;
+      });
+    }
   }
 
   Future<void> _loadUserData() async {
@@ -75,39 +78,39 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  void _showArticleOptions(BuildContext context, ArticleData article) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: colorAccent.background,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (_) => Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: Icon(Icons.bookmark_border_rounded, color: colorAccent.primaryText),
-              title: UtilText('Save Article', family: Fonts.defaultFontRegular, color: colorAccent.primaryText),
-              onTap: () {
-                Navigator.pop(context);
-                debugPrint('save ${article.id}');
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.share_rounded, color: colorAccent.primaryText),
-              title: UtilText('Share', family: Fonts.defaultFontRegular, color: colorAccent.primaryText),
-              onTap: () {
-                Navigator.pop(context);
-                Share.share('${article.title}\n\n${article.sourceUrl}');
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+  // void _showArticleOptions(BuildContext context, ArticleData article) {
+  //   showModalBottomSheet(
+  //     context: context,
+  //     backgroundColor: colorAccent.background,
+  //     shape: const RoundedRectangleBorder(
+  //       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+  //     ),
+  //     builder: (_) => Padding(
+  //       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+  //       child: Column(
+  //         mainAxisSize: MainAxisSize.min,
+  //         children: [
+  //           ListTile(
+  //             leading: Icon(Icons.bookmark_border_rounded, color: colorAccent.primaryText),
+  //             title: UtilText('Save Article', family: Fonts.defaultFontRegular, color: colorAccent.primaryText),
+  //             onTap: () {
+  //               Navigator.pop(context);
+  //               debugPrint('save ${article.id}');
+  //             },
+  //           ),
+  //           ListTile(
+  //             leading: Icon(Icons.share_rounded, color: colorAccent.primaryText),
+  //             title: UtilText('Share', family: Fonts.defaultFontRegular, color: colorAccent.primaryText),
+  //             onTap: () {
+  //               Navigator.pop(context);
+  //               Share.share('${article.title}\n\n${article.sourceUrl}');
+  //             },
+  //           ),
+  //         ],
+  //       ),
+  //     ),
+  //   );
+  // }
 
 
   @override
@@ -296,107 +299,112 @@ class _HomeScreenState extends State<HomeScreen> {
           //   ],
           // ),
 
-          UtilFlexBox(
-            direction: Axis.vertical,
-            margin: EdgeInsets.symmetric(horizontal: 0, vertical: 10),
-            gap: 5,
-            children: [
-              UtilFlexBox(
-                direction: Axis.horizontal,
-                cross: CrossAxisAlignment.end,
-                margin: EdgeInsets.symmetric(horizontal: 20, vertical: 0),
-                children: [
-                  Expanded(
-                    child: UtilText(
-                      "Popular Articles",
-                      family: Fonts.defaultFontMedium,
-                      size: 20,
-                      color: colorAccent.primaryText,
-                    ),
-                  )
-                ],
-              ),
-              if (_articles.isEmpty)
-                // Loading shimmer / placeholder
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: UtilFlexBox(
-                    margin: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-                    height: 220,
-                    direction: Axis.horizontal,
-                    gap: 15,
-                    children: List.generate(
-                      3,
-                      (_) => Container(
-                        width: 220,
-                        decoration: BoxDecoration(
-                          color: colorAccent.cardLight,
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                      ),
-                    ),
-                  ),
-                )
-              else
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: UtilFlexBox(
-                    margin: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-                    height: 220,
-                    direction: Axis.horizontal,
-                    gap: 15,
-                    children: _articles.map((article) {
-                      return UtilFlexBox(
-                        onTap: () => navigateTo(
-                          context,
-                          animationType: NavAnimation.slideUp,
-                          duration: preferredAnimations.getDuration(),
-                          page: ArticleScreen(article: article),
-                        ),
-                        borderRadius: BorderRadius.circular(15),
-                        gap: 8,
-                        direction: Axis.vertical,
-                        width: 220,
-                        height: double.maxFinite,
-                        children: [
-                          UtilFitImage(
-                            article.imageUrl,
-                            height: 150,
-                            borderRadius: BorderRadius.circular(15),
-                            width: double.maxFinite,
-                            fit: BoxFit.cover,
-                          ),
-                          UtilFlexBox(
-                            direction: Axis.horizontal,
-                            children: [
-                              Expanded(
-                                child: UtilText(
-                                  article.title,
-                                  family: Fonts.defaultFontExtraLight,
-                                  size: 14,
-                                  color: colorAccent.secondaryText,
-                                ),
-                              ),
-                              UtilContainer(
-                                height: 45,
-                                width: 30,
-                                borderRadius: BorderRadius.circular(100),
-                                onTap: () => _showArticleOptions(context, article),
-                                child: Icon(
-                                  Icons.more_vert,
-                                  color: colorAccent.primaryText,
-                                  size: 24,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      );
-                    }).toList(),
-                  ),
-                ),
-            ],
+          _ArticleSection(
+            articles: _articles,
+            isLoading: _articlesLoading,
           ),
+
+          // UtilFlexBox(
+          //   direction: Axis.vertical,
+          //   margin: EdgeInsets.symmetric(horizontal: 0, vertical: 10),
+          //   gap: 5,
+          //   children: [
+          //     UtilFlexBox(
+          //       direction: Axis.horizontal,
+          //       cross: CrossAxisAlignment.end,
+          //       margin: EdgeInsets.symmetric(horizontal: 20, vertical: 0),
+          //       children: [
+          //         Expanded(
+          //           child: UtilText(
+          //             "Popular Articles",
+          //             family: Fonts.defaultFontMedium,
+          //             size: 20,
+          //             color: colorAccent.primaryText,
+          //           ),
+          //         )
+          //       ],
+          //     ),
+          //     if (_articles.isEmpty)
+          //       // Loading shimmer / placeholder
+          //       SingleChildScrollView(
+          //         scrollDirection: Axis.horizontal,
+          //         child: UtilFlexBox(
+          //           margin: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+          //           height: 220,
+          //           direction: Axis.horizontal,
+          //           gap: 15,
+          //           children: List.generate(
+          //             3,
+          //             (_) => Container(
+          //               width: 220,
+          //               decoration: BoxDecoration(
+          //                 color: colorAccent.cardLight,
+          //                 borderRadius: BorderRadius.circular(15),
+          //               ),
+          //             ),
+          //           ),
+          //         ),
+          //       )
+          //     else
+          //       SingleChildScrollView(
+          //         scrollDirection: Axis.horizontal,
+          //         child: UtilFlexBox(
+          //           margin: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+          //           height: 220,
+          //           direction: Axis.horizontal,
+          //           gap: 15,
+          //           children: _articles.map((article) {
+          //             return UtilFlexBox(
+          //               onTap: () => navigateTo(
+          //                 context,
+          //                 animationType: NavAnimation.slideUp,
+          //                 duration: preferredAnimations.getDuration(),
+          //                 page: ArticleScreen(article: article),
+          //               ),
+          //               borderRadius: BorderRadius.circular(15),
+          //               gap: 8,
+          //               direction: Axis.vertical,
+          //               width: 220,
+          //               height: double.maxFinite,
+          //               children: [
+          //                 UtilFitImage(
+          //                   article.imageUrl,
+          //                   height: 150,
+          //                   borderRadius: BorderRadius.circular(15),
+          //                   width: double.maxFinite,
+          //                   fit: BoxFit.cover,
+          //                 ),
+          //                 UtilFlexBox(
+          //                   direction: Axis.horizontal,
+          //                   children: [
+          //                     Expanded(
+          //                       child: UtilText(
+          //                         article.title,
+          //                         family: Fonts.defaultFontExtraLight,
+          //                         size: 14,
+          //                         color: colorAccent.secondaryText,
+          //                       ),
+          //                     ),
+          //                     UtilContainer(
+          //                       height: 45,
+          //                       width: 30,
+          //                       borderRadius: BorderRadius.circular(100),
+          //                       onTap: () => _showArticleOptions(context, article),
+          //                       child: Icon(
+          //                         Icons.more_vert,
+          //                         color: colorAccent.primaryText,
+          //                         size: 24,
+          //                       ),
+          //                     ),
+          //                   ],
+          //                 ),
+          //               ],
+          //             );
+          //           }).toList(),
+          //         ),
+          //       ),
+          //   ],
+          // ),
 
           //planty
           // UtilFlexBox(
@@ -456,6 +464,219 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _ArticleSection extends StatelessWidget {
+  const _ArticleSection({
+    required this.articles,
+    required this.isLoading,
+  });
+
+  final List<PlantArticle> articles;
+  final bool isLoading;
+
+  @override
+  Widget build(BuildContext context) {
+    return UtilFlexBox(
+      direction: Axis.vertical,
+      margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 10),
+      gap: 5,
+      children: [
+        // Section header
+        UtilFlexBox(
+          direction: Axis.horizontal,
+          cross: CrossAxisAlignment.end,
+          margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
+          children: [
+            Expanded(
+              child: UtilText(
+                "Popular Articles",
+                family: Fonts.defaultFontMedium,
+                size: 20,
+                color: colorAccent.primaryText,
+              ),
+            ),
+            UtilFlexBox(
+              onTap: () => debugPrint("view all articles"),
+              borderRadius: BorderRadius.circular(100),
+              cross: CrossAxisAlignment.center,
+              direction: Axis.horizontal,
+              gap: 5,
+              children: [
+                UtilText(
+                  "View All",
+                  size: 18,
+                  family: Fonts.defaultFontExtraLight,
+                  color: colorAccent.secondary,
+                ),
+                Icon(
+                  Icons.arrow_forward_rounded,
+                  size: 18,
+                  color: colorAccent.secondary,
+                ),
+              ],
+            ),
+          ],
+        ),
+
+        // Horizontal scroll list
+        if (isLoading)
+          SizedBox(
+            height: 220,
+            child: Center(
+              child: CircularProgressIndicator(color: colorAccent.secondary),
+            ),
+          )
+        else
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: UtilFlexBox(
+              margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+              height: 250,
+              direction: Axis.horizontal,
+              gap: 15,
+              children: articles
+                  .map((article) => _ArticleCard(article: article))
+                  .toList(),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+// ── Article Card ─────────────────────────────────────────────────────────────
+
+class _ArticleCard extends StatelessWidget {
+  const _ArticleCard({required this.article});
+
+  final PlantArticle article;
+
+  @override
+  Widget build(BuildContext context) {
+    return UtilFlexBox(
+      onTap: () => navigateTo(
+        context,
+        animationType: NavAnimation.slideUp,
+        duration: preferredAnimations.getDuration(),
+        page: ArticleDetailScreen(article: article),
+      ),
+      borderRadius: BorderRadius.circular(15),
+      gap: 8,
+      direction: Axis.vertical,
+      width: 220,
+      height: double.maxFinite,
+      children: [
+        // Thumbnail
+        ClipRRect(
+          borderRadius: BorderRadius.circular(15),
+          child: UtilFitImageNetwork(
+            article.imageUrl,
+            height: 150,
+            width: double.maxFinite,
+            imageNotFound: UtilContainer(
+              height: 150,
+              width: double.maxFinite,
+              color: colorAccent.cardLight,
+              borderRadius: BorderRadius.circular(15),
+              alignment: Alignment.center,
+              child: Icon(Icons.eco_outlined, size: 40, color: colorAccent.secondary),
+            )
+          )
+        ),
+
+        // Title + menu
+        UtilFlexBox(
+          direction: Axis.horizontal,
+          children: [
+            Expanded(
+              child: UtilText(
+                article.title,
+                family: Fonts.defaultFontExtraLight,
+                size: 14,
+                color: colorAccent.secondaryText,
+              ),
+            ),
+            UtilContainer(
+              height: 45,
+              width: 30,
+              borderRadius: BorderRadius.circular(100),
+              onTap: () => _showArticleOptions(context),
+              child: Icon(
+                Icons.more_vert,
+                color: colorAccent.primaryText,
+                size: 24,
+              ),
+            ),
+          ],
+        ),
+
+        // Source label
+        Row(
+          children: [
+            Icon(Icons.link, size: 11, color: colorAccent.secondary),
+            const SizedBox(width: 3),
+            Expanded(
+              child: UtilText(
+                Uri.tryParse(article.sourceUrl)?.host ?? article.sourceName,
+                size: 11,
+                color: colorAccent.secondary,
+                family: Fonts.defaultFontThin,
+                overflow: TextOverflow.ellipsis,
+              )
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  void _showArticleOptions(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: colorAccent.background,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (_) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: Icon(Icons.bookmark_outline,
+                  color: colorAccent.primaryText),
+              title: UtilText('Save article',
+                  size: 16,
+                  family: Fonts.defaultFontRegular,
+                  color: colorAccent.primaryText),
+              onTap: () => Navigator.pop(context),
+            ),
+            ListTile(
+              leading:
+                  Icon(Icons.share_outlined, color: colorAccent.primaryText),
+              title: UtilText('Share',
+                  size: 16,
+                  family: Fonts.defaultFontRegular,
+                  color: colorAccent.primaryText),
+              onTap: () => Navigator.pop(context),
+            ),
+            ListTile(
+              leading: Icon(Icons.open_in_browser_outlined,
+                  color: colorAccent.primaryText),
+              title: UtilText('Open in browser',
+                  size: 16,
+                  family: Fonts.defaultFontRegular,
+                  color: colorAccent.primaryText),
+              onTap: () {
+                Navigator.pop(context);
+                // The detail screen handles URL launching
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -592,8 +813,8 @@ class HomeWeatherCard extends StatelessWidget {
             if (!loading && weatherData != null)
               SvgPicture.asset(
                 weatherData!.today.condition.svgAsset,
-                width: 75,
-                height: 75,
+                width: 100,
+                height: 100,
                 colorFilter: ColorFilter.mode(
                     colorAccent.secondary, BlendMode.srcIn),
               )
