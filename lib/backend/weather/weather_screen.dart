@@ -70,7 +70,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
         current: _location,
         onSave: (loc) async {
           await saveWeatherLocation(loc);
-          await WeatherService.instance.clearCache();
+          await WeatherService.instance.clearApiCache();
           await _load(forceRefresh: true);
         },
       ),
@@ -83,25 +83,27 @@ class _WeatherScreenState extends State<WeatherScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: colorAccent.background,
-      appBar: subAppbar(
-        title: 'Weather',
-        addonChildren: [
-          UtilContainer(
-            onTap: _openSettings,
-            borderRadius: BorderRadius.circular(100),
-            width: 40,
-            height: 40,
-            child: Icon(
-              Icons.settings_outlined,
-              color: colorAccent.primaryText,
-            ),
-          ),
-        ],
-      ),
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // ── App bar ──
+            subAppbar(
+              title: 'Weather',
+              addonChildren: [
+                UtilContainer(
+                  onTap: _openSettings,
+                  borderRadius: BorderRadius.circular(100),
+                  width: 40,
+                  height: 40,
+                  child: Icon(
+                    Icons.settings_outlined,
+                    color: colorAccent.primaryText,
+                  ),
+                ),
+              ],
+            ),
+
             // ── Location ──
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -439,7 +441,7 @@ class _LocationSettingsSheetState extends State<_LocationSettingsSheet> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: colorAccent.secondaryText,
+                  color: colorAccent.secondaryText.withOpacity(0.3),
                   borderRadius: BorderRadius.circular(100),
                 ),
               ),
@@ -478,7 +480,7 @@ class _LocationSettingsSheetState extends State<_LocationSettingsSheet> {
                           color: colorAccent.cardLight,
                           borderRadius: BorderRadius.circular(100),
                           border: Border.all(
-                            color: colorAccent.secondary,
+                            color: colorAccent.secondary.withOpacity(0.3),
                           ),
                         ),
                         child: UtilText(
@@ -567,6 +569,7 @@ class _LocationSettingsSheetState extends State<_LocationSettingsSheet> {
                       color: Colors.white,
                     ),
             ),
+            const SizedBox(height: 30),
           ],
         ),
       ),
@@ -600,7 +603,7 @@ class _LocationSettingsSheetState extends State<_LocationSettingsSheet> {
           decoration: InputDecoration(
             hintText: hint,
             hintStyle: TextStyle(
-              color: colorAccent.secondaryText,
+              color: colorAccent.secondaryText.withOpacity(0.5),
               fontFamily: Fonts.defaultFontExtraLight.fontFamily,
               fontSize: 14,
             ),

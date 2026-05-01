@@ -253,25 +253,25 @@ class _LoginScreenState extends State<LoginScreen> {
               family: Fonts.defaultFontRegular,
             ),
 
-            UtilContainer(
-              height: 60,
-              width: double.maxFinite,
-              borderRadius: BorderRadius.circular(100),
-              border: Border.all(color: colorAccent.cardDark, width: 1.3),
-              alignment: Alignment.center,
-              child: UtilText(
-                "Continue with Google",
-                prefix: UtilContainer(
-                  margin: EdgeInsets.symmetric(horizontal: 5),
-                  height: 35,
-                  width: 35,
-                  child: SvgPicture.asset('assets/images/icons/svg/google.svg'),
-                ),
-                family: Fonts.defaultFontThin,
-                color: colorAccent.primaryText,
-                size: 18,
-              ),
-            ),
+            // UtilContainer(
+            //   height: 60,
+            //   width: double.maxFinite,
+            //   borderRadius: BorderRadius.circular(100),
+            //   border: Border.all(color: colorAccent.cardDark, width: 1.3),
+            //   alignment: Alignment.center,
+            //   child: UtilText(
+            //     "Continue with Google",
+            //     prefix: UtilContainer(
+            //       margin: EdgeInsets.symmetric(horizontal: 5),
+            //       height: 35,
+            //       width: 35,
+            //       child: SvgPicture.asset('assets/images/icons/svg/google.svg'),
+            //     ),
+            //     family: Fonts.defaultFontThin,
+            //     color: colorAccent.primaryText,
+            //     size: 18,
+            //   ),
+            // ),
 
             UtilFlexBox(
               margin: EdgeInsets.symmetric(vertical: 10),

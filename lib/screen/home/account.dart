@@ -94,18 +94,18 @@ class _AccountScreenState extends State<AccountScreen> {
             direction: Axis.vertical,
             gap: 10,
             children: [
-              SettingList(
-                icon: Icons.notifications_none_rounded,
-                name: 'Notifications',
-              ),
-              SettingList(
-                icon: Icons.bookmark_border_rounded,
-                name: 'Bookmarks',
-              ),
-              SettingList(
-                icon: Icons.lock_outline_rounded,
-                name: 'Security & Privacy',
-              ),
+              // SettingList(
+              //   icon: Icons.notifications_none_rounded,
+              //   name: 'Notifications',
+              // ),
+              // SettingList(
+              //   icon: Icons.bookmark_border_rounded,
+              //   name: 'Bookmarks',
+              // ),
+              // SettingList(
+              //   icon: Icons.lock_outline_rounded,
+              //   name: 'Security & Privacy',
+              // ),
               SettingList(
                 icon: Icons.color_lens_outlined,
                 name: 'Appearance & Personalization',
@@ -143,6 +143,7 @@ class _AccountScreenState extends State<AccountScreen> {
                     animationType: NavAnimation.slideLeft,
                     duration: preferredAnimations.getDuration(),
                     page: GetStartedScreen(),
+                    replace: true
                   );
                 },
               ),

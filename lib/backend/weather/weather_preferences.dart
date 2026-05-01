@@ -1,7 +1,12 @@
 import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
 
-const _locationKey = 'weather_location';
+import 'package:flutter/material.dart';
+import 'package:plantify/backend/firestore/firestore.dart';
+import 'package:plantify/storage/preferences.dart';
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Model
+// ─────────────────────────────────────────────────────────────────────────────
 
 class WeatherLocation {
   final String name;
@@ -27,7 +32,6 @@ class WeatherLocation {
         longitude: (json['longitude'] as num).toDouble(),
       );
 
-  // Default location (Ipil, Philippines — matching your design)
   static const defaultLocation = WeatherLocation(
     name: 'Ipil, Philippines',
     latitude: 7.7851,
@@ -35,19 +39,66 @@ class WeatherLocation {
   );
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Read
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// Reads `preferredWeather` from inside userData in SharedPreferences.
+/// Falls back to [WeatherLocation.defaultLocation] if missing or corrupt.
 Future<WeatherLocation> loadWeatherLocation() async {
   try {
-    final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getString(_locationKey);
-    if (raw == null) return WeatherLocation.defaultLocation;
+    final Map<String, dynamic> userData =
+        await loadPreferencesOnMap('userData', {});
+
+    final raw = userData['preferredWeather'];
+    if (raw == null || (raw as String).isEmpty) {
+      return WeatherLocation.defaultLocation;
+    }
+
     return WeatherLocation.fromJson(
         jsonDecode(raw) as Map<String, dynamic>);
-  } catch (_) {
+  } catch (e) {
+    debugPrint('[WeatherPreferences] loadWeatherLocation error: $e');
     return WeatherLocation.defaultLocation;
   }
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Write  (mirrors the addPlantToGarden pattern exactly)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// Saves `preferredWeather` inside userData, persists to SharedPreferences,
+/// then syncs the whole userData document to Firestore — same flow as
+/// addPlantToGarden() in PlantInfoScreen.
 Future<void> saveWeatherLocation(WeatherLocation location) async {
-  final prefs = await SharedPreferences.getInstance();
-  await prefs.setString(_locationKey, jsonEncode(location.toJson()));
+  try {
+    // 1. Load full userData (so we never lose other fields)
+    final Map<String, dynamic> userData =
+        await loadPreferencesOnMap('userData', {});
+
+    // 2. Patch only the preferredWeather field
+    userData['preferredWeather'] = jsonEncode(location.toJson());
+
+    // 3. Persist locally
+    await savePreferencesOnMap('userData', userData);
+
+    // 4. Sync to Firestore
+    _syncToFirestore(userData);
+  } catch (e) {
+    debugPrint('[WeatherPreferences] saveWeatherLocation error: $e');
+  }
+}
+
+void _syncToFirestore(Map<String, dynamic> userData) {
+  try {
+    final FirestoreService firestoreService = FirestoreService();
+    firestoreService.updateWhere(
+      collection: 'users',
+      field: 'uuid',
+      isEqualTo: userData['uuid'],
+      newData: userData,
+    );
+  } catch (e) {
+    debugPrint('[WeatherPreferences] Firestore sync error: $e');
+  }
 }
