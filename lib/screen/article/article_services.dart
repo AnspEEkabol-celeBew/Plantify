@@ -51,7 +51,7 @@ class ArticleService {
   static const _cacheKey = 'cached_plant_articles';
   static const _cacheTimeKey = 'cached_plant_articles_time';
 
-  // ─── Hardcoded seed articles (active URLs verified May 2026) ──────────────
+  // ─── Hardcoded seed articles cause im broke asf (active URLs verified May 2026) ──────────────
   // These are used as a fallback or when the random refresh fires.
   // Feel free to extend / swap these out as needed.
   static final List<PlantArticle> _seedArticles = [
@@ -60,7 +60,7 @@ class ArticleService {
       description:
           'Make a New Year resolution to grow your best-ever plants and master next-level gardening techniques that will turn you into an expert in no time.',
       imageUrl:
-          'https://cdn.mos.cms.futurecdn.net/ogZLxC36t476Z7zdJtMCRT-1600-80.jpg.webp',
+          'https://cdn.mos.cms.futurecdn.net/ogZLxC36t476Z7zdJtMCRT-1600-80.jpg',
       sourceUrl:
           'https://www.gardeningknowhow.com/garden-how-to/info/expert-gardening-techniques',
       sourceName: 'Gardening Know How',
@@ -90,7 +90,7 @@ class ArticleService {
       description:
           'Looking to build a houseplant collection? Choose houseplants trending right now — bold colors, eye-catching leaf patterns, and air-purifying superpowers.',
       imageUrl:
-          'https://cdn.mos.cms.futurecdn.net/houseplants-2025-hero.jpg',
+          'https://cdn.mos.cms.futurecdn.net/cwhtRoevpS4T3TbzX2rG64-1600-80.jpg.webp',
       sourceUrl:
           'https://www.gardeningknowhow.com/houseplants/the-hottest-houseplants-of-2025-what-to-look-out-for',
       sourceName: 'Gardening Know How',
@@ -105,7 +105,7 @@ class ArticleService {
       description:
           'From peat-free planting to AI in the garden — the trends and talking points that defined the horticultural year, as told by the RHS.',
       imageUrl:
-          'https://www.rhs.org.uk/getmedia/4f3e1e35-8ad1-4b38-a41b-1e3d8fba2d2e/25-lessons-hero.jpg',
+          'https://www.rhs.org.uk/getmedia/75927269-2de6-4a2f-9090-054e2d26d9b2/header.jpg',
       sourceUrl: 'https://www.rhs.org.uk/garden-inspiration/seasonal/25-lessons-from-2025',
       sourceName: 'RHS',
       body:
@@ -119,7 +119,7 @@ class ArticleService {
       description:
           'In 2025 gardeners will be tearing up traditional planting choices with front gardens reimagined for a greener future, says the RHS.',
       imageUrl:
-          'https://www.rhs.org.uk/getmedia/8b5cac3e-9012-4e4d-a6c3-da9e3f33a3e9/predictions-2025.jpg',
+          'https://www.rhs.org.uk/getmedia/7c1dfd18-8826-4e2d-9ee8-c8aa7ac2a381/Little-gardener-1088x512.jpg?width=1184',
       sourceUrl:
           'https://www.rhs.org.uk/garden-inspiration/seasonal/2025-gardening-predictions',
       sourceName: 'RHS',
