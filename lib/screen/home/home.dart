@@ -499,26 +499,6 @@ class _ArticleSection extends StatelessWidget {
                 color: colorAccent.primaryText,
               ),
             ),
-            UtilFlexBox(
-              onTap: () => debugPrint("view all articles"),
-              borderRadius: BorderRadius.circular(100),
-              cross: CrossAxisAlignment.center,
-              direction: Axis.horizontal,
-              gap: 5,
-              children: [
-                UtilText(
-                  "View All",
-                  size: 18,
-                  family: Fonts.defaultFontExtraLight,
-                  color: colorAccent.secondary,
-                ),
-                Icon(
-                  Icons.arrow_forward_rounded,
-                  size: 18,
-                  color: colorAccent.secondary,
-                ),
-              ],
-            ),
           ],
         ),
 
