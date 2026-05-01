@@ -10,6 +10,8 @@ import 'package:plantify/util/form.dart';
 import 'package:plantify/util/layout.dart';
 import 'package:plantify/util/text.dart';
 import 'package:icons_flutter/icons_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../backend/firebase/authenication.dart';
 import '../../backend/firestore/firestore.dart';
@@ -40,21 +42,20 @@ class _LoginScreenState extends State<LoginScreen> {
     String result;
     String email = extractFromController(emailController);
     String password = extractFromController(passwordController);
-    result = await firebaseAuthService.login(
-      email,
-      password,
-    );
+    result = await firebaseAuthService.login(email, password);
     if (result == "Success") {
       setState(() {
         error = "";
       });
       showSnackBar();
 
-      Map<String, dynamic> userData = firestoreService.getOnlyFromMap(await firestoreService.loadWhere(
-        collection: 'users',
-        field: 'email',
-        isEqualTo: email,
-      ));
+      Map<String, dynamic> userData = firestoreService.getOnlyFromMap(
+        await firestoreService.loadWhere(
+          collection: 'users',
+          field: 'email',
+          isEqualTo: email,
+        ),
+      );
 
       savePreferencesOnMap('userData', userData);
       savePreferencesOnBool('isLogin', true);
@@ -70,6 +71,25 @@ class _LoginScreenState extends State<LoginScreen> {
       setState(() {
         error = result;
       });
+    }
+  }
+
+  Future<void> _launchUrl(BuildContext context, String url) async {
+    // Add https:// if the scheme is missing
+    String formattedUrl = url;
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      formattedUrl = 'https://$url';
+    }
+
+    final uri = Uri.parse(formattedUrl);
+
+    try {
+      if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+        // Handle failure (e.g., show a snackbar)
+      }
+    } catch (e) {
+      // Handle the PlatformException gracefully
+      debugPrint('Could not launch $formattedUrl: $e');
     }
   }
 
@@ -272,7 +292,6 @@ class _LoginScreenState extends State<LoginScreen> {
             //     size: 18,
             //   ),
             // ),
-
             UtilFlexBox(
               margin: EdgeInsets.symmetric(vertical: 10),
               direction: Axis.horizontal,
@@ -281,7 +300,12 @@ class _LoginScreenState extends State<LoginScreen> {
               children: [
                 UtilText(
                   "Privacy Policy",
-                  onTap: () => debugPrint("sss"),
+                  onTap: () {
+                    _launchUrl(
+                      context,
+                      'https://plantifyappwebsupport.netlify.app/privacy_policy',
+                    );
+                  },
                   align: TextAlign.center,
                   color: colorAccent.secondaryText,
                   size: 17,
@@ -289,7 +313,12 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 UtilText(
                   "Terms of Service",
-                  onTap: () => debugPrint("sss"),
+                  onTap: () {
+                    _launchUrl(
+                      context,
+                      'https://plantifyappwebsupport.netlify.app/terms_of_service',
+                    );
+                  },
                   align: TextAlign.center,
                   color: colorAccent.secondaryText,
                   size: 17,

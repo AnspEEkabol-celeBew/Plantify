@@ -9,10 +9,13 @@ import 'package:plantify/screen/authentication/get_started.dart';
 import 'package:plantify/storage/preferences.dart';
 import 'package:plantify/util/image.dart';
 import 'package:plantify/util/layout.dart';
+import 'package:plantify/util/miscellaneous.dart';
 import 'package:plantify/util/navigation.dart';
 import 'package:plantify/util/snackbar.dart';
 import 'package:plantify/util/text.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../backend/firestore/firestore.dart';
 import '../../theme/colors.dart';
@@ -42,6 +45,14 @@ class _AccountScreenState extends State<AccountScreen> {
   }
 
   // ── Profile Picture ─────────────────────────────────────────────────────────
+  Future<File> testCompressAndGetFile(File file, String targetPath) async {
+    var result = await FlutterImageCompress.compressAndGetFile(
+      file.absolute.path,
+      targetPath,
+      quality: 88,
+    );
+    return File(result!.path);
+  }
 
   Future<void> _pickAndUploadPhoto() async {
     final picker = ImagePicker();
@@ -60,15 +71,18 @@ class _AccountScreenState extends State<AccountScreen> {
       final supabase = Supabase.instance.client;
 
       // Upload to Supabase Storage (bucket: 'profiles')
-      await supabase.storage.from('profiles').upload(
+      await supabase.storage
+          .from('profiles')
+          .upload(
             fileName,
             file,
             fileOptions: const FileOptions(upsert: true), // overwrite existing
           );
 
       // Get the public URL
-      final publicUrl =
-          supabase.storage.from('profiles').getPublicUrl(fileName);
+      final publicUrl = supabase.storage
+          .from('profiles')
+          .getPublicUrl(fileName);
 
       // Update userData locally + SharedPreferences + Firestore
       _userData['profile_url'] = publicUrl;
@@ -92,6 +106,122 @@ class _AccountScreenState extends State<AccountScreen> {
       isEqualTo: userData['uuid'],
       newData: userData,
     );
+  }
+
+  Future<void> _launchUrl(BuildContext context, String url) async {
+    // Add https:// if the scheme is missing
+    String formattedUrl = url;
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      formattedUrl = 'https://$url';
+    }
+
+    final uri = Uri.parse(formattedUrl);
+
+    try {
+      if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+        // Handle failure (e.g., show a snackbar)
+      }
+    } catch (e) {
+      // Handle the PlatformException gracefully
+      debugPrint('Could not launch $formattedUrl: $e');
+    }
+  }
+
+  void _openEditUsername() {
+    final controller = TextEditingController(
+      text: _userData['username'] as String? ?? '',
+    );
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) {
+        final bottomPad = MediaQuery.of(context).viewInsets.bottom;
+        return Container(
+          padding: EdgeInsets.fromLTRB(20, 20, 20, 20 + bottomPad),
+          decoration: BoxDecoration(
+            color: colorAccent.background,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          child: UtilFlexBox(
+            direction: Axis.vertical,
+            gap: 16,
+            children: [
+              // Handle
+              Center(
+                child: UtilContainer(
+                  width: 44,
+                  height: 4,
+                  borderRadius: BorderRadius.circular(100),
+                  color: colorAccent.secondaryText,
+                ),
+              ),
+              UtilText(
+                "Edit Username",
+                size: 28,
+                family: Fonts.defaultFontSemiBold,
+                color: colorAccent.primaryText,
+              ),
+              // Input
+              Container(
+                decoration: BoxDecoration(
+                  color: colorAccent.cardLight,
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                padding: EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+                child: TextField(
+                  controller: controller,
+                  autofocus: true,
+                  style: TextStyle(
+                    fontFamily: Fonts.defaultFontRegular.fontFamily,
+                    fontSize: 16,
+                    color: colorAccent.primaryText,
+                  ),
+                  decoration: InputDecoration(
+                    border: InputBorder.none,
+                    hintText: "Enter new username",
+                    hintStyle: TextStyle(
+                      fontFamily: Fonts.defaultFontExtraLight.fontFamily,
+                      fontSize: 15,
+                      color: colorAccent.secondaryText,
+                    ),
+                  ),
+                ),
+              ),
+              // Save button
+              UtilContainer(
+                onTap: () async {
+                  final newName = controller.text.trim();
+                  if (newName.isEmpty) return;
+                  Navigator.pop(context);
+                  await _saveUsername(newName);
+                },
+                width: double.maxFinite,
+                height: 56,
+                borderRadius: BorderRadius.circular(100),
+                color: colorAccent.secondary,
+                alignment: Alignment.center,
+                child: UtilText(
+                  "Save",
+                  family: Fonts.defaultFontRegular,
+                  size: 16,
+                  color: colorAccent.white,
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _saveUsername(String newName) async {
+    _userData['username'] = newName;
+    await savePreferencesOnMap('userData', _userData);
+    _updateFirestore(_userData);
+    setState(() {});
+    _showSnackBar("Username updated!");
   }
 
   void _showSnackBar(String message) {
@@ -125,7 +255,7 @@ class _AccountScreenState extends State<AccountScreen> {
     // Determine if we have a real uploaded URL or still the default placeholder
     final bool hasNetworkPhoto =
         profileUrl.startsWith('http') || profileUrl.startsWith('https');
-
+    utilDebugPrint(hasNetworkPhoto);
     return SingleChildScrollView(
       child: UtilFlexBox(
         margin: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
@@ -180,22 +310,22 @@ class _AccountScreenState extends State<AccountScreen> {
                       ),
 
                     // Camera icon overlay (only when not uploading)
-                    if (!_isUploadingPhoto)
-                      Positioned(
-                        bottom: 0,
-                        left: 0,
-                        right: 0,
-                        child: Container(
-                          height: 26,
-                          color: Colors.black,
-                          alignment: Alignment.center,
-                          child: Icon(
-                            Icons.camera_alt_rounded,
-                            color: colorAccent.white,
-                            size: 15,
-                          ),
-                        ),
-                      ),
+                    // if (!_isUploadingPhoto)
+                    //   Positioned(
+                    //     bottom: 0,
+                    //     left: 0,
+                    //     right: 0,
+                    //     child: Container(
+                    //       height: 26,
+                    //       color: Colors.black,
+                    //       alignment: Alignment.center,
+                    //       child: Icon(
+                    //         Icons.camera_alt_rounded,
+                    //         color: colorAccent.white,
+                    //         size: 15,
+                    //       ),
+                    //     ),
+                    //   ),
                   ],
                 ),
               ),
@@ -203,6 +333,7 @@ class _AccountScreenState extends State<AccountScreen> {
               // Username + email
               Expanded(
                 child: UtilFlexBox(
+                  onTap: _openEditUsername,
                   direction: Axis.vertical,
                   padding: EdgeInsets.symmetric(vertical: 10),
                   gap: 2,
@@ -254,6 +385,12 @@ class _AccountScreenState extends State<AccountScreen> {
               SettingList(
                 icon: Icons.help_outline_rounded,
                 name: 'Help & Support',
+                onTap: () {
+                  _launchUrl(
+                    context,
+                    'https://plantifyappwebsupport.netlify.app/help',
+                  );
+                },
               ),
               SettingList(
                 icon: Icons.logout,
@@ -306,11 +443,7 @@ class SettingList extends StatelessWidget {
       gap: 10,
       cross: CrossAxisAlignment.center,
       children: [
-        Icon(
-          icon,
-          size: 30,
-          color: color ?? colorAccent.primaryText,
-        ),
+        Icon(icon, size: 30, color: color ?? colorAccent.primaryText),
         Expanded(
           child: UtilText(
             name,

@@ -12,6 +12,7 @@ import 'package:plantify/util/layout.dart';
 import 'package:plantify/util/string.dart';
 import 'package:plantify/util/text.dart';
 import 'package:icons_flutter/icons_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../main.dart';
 import '../../util/navigation.dart';
@@ -26,7 +27,7 @@ class RegisterScreen extends StatefulWidget {
 
 class _RegisterScreenState extends State<RegisterScreen> {
   FirestoreService firestoreService = FirestoreService();
-  
+
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final confirmPasswordController = TextEditingController();
@@ -36,67 +37,86 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool showConfirmPassword = false;
 
   void signUp() async {
-  String email = extractFromController(emailController);
-  String password = extractFromController(passwordController);
-  String confirmPassword = extractFromController(confirmPasswordController);
+    String email = extractFromController(emailController);
+    String password = extractFromController(passwordController);
+    String confirmPassword = extractFromController(confirmPasswordController);
 
-  // ── Validation (no async needed) ─────────────────────────
-  if (email.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
-    setState(() => error = "Please fill all the inputs.");
-    return;
-  }
+    // ── Validation (no async needed) ─────────────────────────
+    if (email.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
+      setState(() => error = "Please fill all the inputs.");
+      return;
+    }
 
-  if (!isValidEmail(email)) {
-    setState(() => error = "Invalid email format.");
-    return;
-  }
+    if (!isValidEmail(email)) {
+      setState(() => error = "Invalid email format.");
+      return;
+    }
 
-  if (password.length < 6) {
-    setState(() => error = "Password must be more than 6 characters.");
-    return;
-  }
+    if (password.length < 6) {
+      setState(() => error = "Password must be more than 6 characters.");
+      return;
+    }
 
-  if (password != confirmPassword) {
-    setState(() => error = "Password confirmation does not match.");
-    return;
-  }
+    if (password != confirmPassword) {
+      setState(() => error = "Password confirmation does not match.");
+      return;
+    }
 
-  // ── Internet check ───────────────────────────────────────
-  try {
-    final result = await InternetAddress.lookup('google.com');
-    if (result.isEmpty || result[0].rawAddress.isEmpty) {
+    // ── Internet check ───────────────────────────────────────
+    try {
+      final result = await InternetAddress.lookup('google.com');
+      if (result.isEmpty || result[0].rawAddress.isEmpty) {
+        setState(() => error = "No internet connection.");
+        return;
+      }
+    } on SocketException {
       setState(() => error = "No internet connection.");
       return;
     }
-  } on SocketException {
-    setState(() => error = "No internet connection.");
-    return;
-  }
 
-  // ── Firebase check ───────────────────────────────────────
-  try {
-    final emails = await firestoreService.loadAllPickKey<String>(
-      collection: 'users',
-      key: 'email',
-    );
+    // ── Firebase check ───────────────────────────────────────
+    try {
+      final emails = await firestoreService.loadAllPickKey<String>(
+        collection: 'users',
+        key: 'email',
+      );
 
-    if (emails.contains(email)) {
-      setState(() => error = "Email is already taken.");
+      if (emails.contains(email)) {
+        setState(() => error = "Email is already taken.");
+        return;
+      }
+    } catch (e) {
+      setState(() => error = "Something went wrong. Please try again.");
       return;
     }
-  } catch (e) {
-    setState(() => error = "Something went wrong. Please try again.");
-    return;
+
+    setState(() => error = "");
+    navigateTo(
+      context,
+      animationType: NavAnimation.slideLeft,
+      duration: preferredAnimations.getDuration(),
+      page: SetupScreen(email: email, password: password),
+    );
   }
 
-  setState(() => error = "");
-  navigateTo(
-    context,
-    animationType: NavAnimation.slideLeft,
-    duration: preferredAnimations.getDuration(),
-    page: SetupScreen(email: email, password: password),
-  );
-}
+  Future<void> _launchUrl(BuildContext context, String url) async {
+    // Add https:// if the scheme is missing
+    String formattedUrl = url;
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      formattedUrl = 'https://$url';
+    }
+
+    final uri = Uri.parse(formattedUrl);
+
+    try {
+      if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+        // Handle failure (e.g., show a snackbar)
+      }
+    } catch (e) {
+      // Handle the PlatformException gracefully
+      debugPrint('Could not launch $formattedUrl: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -329,7 +349,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
             //     size: 18,
             //   ),
             // ),
-
             UtilFlexBox(
               margin: EdgeInsets.symmetric(vertical: 10),
               direction: Axis.horizontal,
@@ -338,7 +357,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
               children: [
                 UtilText(
                   "Privacy Policy",
-                  onTap: () {},
+                  onTap: () {
+                    _launchUrl(
+                      context,
+                      'https://plantifyappwebsupport.netlify.app/privacy_policy',
+                    );
+                  },
                   align: TextAlign.center,
                   color: colorAccent.secondaryText,
                   size: 17,
@@ -346,7 +370,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
                 UtilText(
                   "Terms of Service",
-                  onTap: () => debugPrint("sss"),
+                  onTap: () {
+                    _launchUrl(
+                      context,
+                      'https://plantifyappwebsupport.netlify.app/terms_of_service',
+                    );
+                  },
                   align: TextAlign.center,
                   color: colorAccent.secondaryText,
                   size: 17,

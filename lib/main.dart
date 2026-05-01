@@ -26,7 +26,7 @@ Future<void> main() async {
   cameras = await availableCameras();
   await Firebase.initializeApp();
   await Supabase.initialize(
-    url: 'https://ptyfcjflfjhnxesaykyw.supabase.co/rest/v1/',
+    url: 'https://ptyfcjflfjhnxesaykyw.supabase.co',
     anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0eWZjamZsZmpobnhlc2F5a3l3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2MzI5ODEsImV4cCI6MjA5MzIwODk4MX0.RjD9lq0wXiygdIlsnj6PZsa_YoIlozyX51IALIiNrh0',
   );
   darkMode.value = await loadPreferencesOnBool("isDarkMode", false);

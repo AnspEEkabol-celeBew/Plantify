@@ -24,9 +24,7 @@ class ArticleDetailScreen extends StatelessWidget {
     final uri = Uri.parse(article.sourceUrl);
     if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Could not open the source URL.')),
-        );
+        _showSnackBar(context, 'Could not open the source URL.');
       }
     }
   }
