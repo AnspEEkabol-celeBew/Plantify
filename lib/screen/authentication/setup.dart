@@ -68,6 +68,7 @@ class _SetupScreenState extends State<SetupScreen> {
         'garden':'[]',
         'reminder':'[]',
         'preferredWeather': '',
+        'profile_url':''
       };
 
     authResult = await firebaseAuthService.signUp(email, password);
