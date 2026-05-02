@@ -40,49 +40,5 @@ class DefaultFirebaseOptions {
     }
   }
 
-  static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyDlMIadQsuHoJkAV7DNP0kobmmMXIGP6H0',
-    appId: '1:723620515755:web:af1fc6102b42bd4a71ccee',
-    messagingSenderId: '723620515755',
-    projectId: 'plantifyapp-b5a8b',
-    authDomain: 'plantifyapp-b5a8b.firebaseapp.com',
-    storageBucket: 'plantifyapp-b5a8b.firebasestorage.app',
-    measurementId: 'G-45VD878GYD',
-  );
-
-  static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyA-E_FggiXN4-FJ3tltdZJ_iiDyxMH2Eso',
-    appId: '1:723620515755:android:3cd0801a394d2ab871ccee',
-    messagingSenderId: '723620515755',
-    projectId: 'plantifyapp-b5a8b',
-    storageBucket: 'plantifyapp-b5a8b.firebasestorage.app',
-  );
-
-  static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyCZLCtbYZGAKS3bPaQeDl-ifvPgGa4MBHw',
-    appId: '1:723620515755:ios:e7a027c39f18feb971ccee',
-    messagingSenderId: '723620515755',
-    projectId: 'plantifyapp-b5a8b',
-    storageBucket: 'plantifyapp-b5a8b.firebasestorage.app',
-    iosBundleId: 'com.example.plantify',
-  );
-
-  static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyCZLCtbYZGAKS3bPaQeDl-ifvPgGa4MBHw',
-    appId: '1:723620515755:ios:e7a027c39f18feb971ccee',
-    messagingSenderId: '723620515755',
-    projectId: 'plantifyapp-b5a8b',
-    storageBucket: 'plantifyapp-b5a8b.firebasestorage.app',
-    iosBundleId: 'com.example.plantify',
-  );
-
-  static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyDlMIadQsuHoJkAV7DNP0kobmmMXIGP6H0',
-    appId: '1:723620515755:web:9c0f83aec09a75c071ccee',
-    messagingSenderId: '723620515755',
-    projectId: 'plantifyapp-b5a8b',
-    authDomain: 'plantifyapp-b5a8b.firebaseapp.com',
-    storageBucket: 'plantifyapp-b5a8b.firebasestorage.app',
-    measurementId: 'G-E7RFN24ZMQ',
-  );
+  //hehe
 }
