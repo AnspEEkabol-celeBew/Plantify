@@ -66,35 +66,35 @@ class _GardenScreenState extends State<GardenScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return UtilRefresh(
-      onRefresh: () async {
-        Future.wait([_loadGarden()]);
-      },
-      child: UtilFlexBox(
-        direction: Axis.vertical,
-        children: [
-          UtilFlexBox(
-            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-            width: double.infinity,
-            direction: Axis.vertical,
-            height: 80,
-            gap: 12,
-            children: [
-              UtilInputBox(
-                width: double.maxFinite,
-                height: 50,
-                border: Border.all(color: colorAccent.primaryText, width: 1.5),
-                borderRadius: BorderRadius.circular(15),
-                prefix: Icon(Icons.search, color: colorAccent.primaryText),
-                hint: "Search your plants ...",
-                fonts: Fonts.defaultFontExtraLight,
-                textColor: colorAccent.primaryText,
-                onChanged: _onSearchChanged, // ✅ use the fixed handler
-              ),
-            ],
-          ),
+    return UtilFlexBox(
+      direction: Axis.vertical,
+      children: [
+        UtilFlexBox(
+          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          width: double.infinity,
+          direction: Axis.vertical,
+          height: 80,
+          gap: 12,
+          children: [
+            UtilInputBox(
+              width: double.maxFinite,
+              height: 50,
+              border: Border.all(color: colorAccent.primaryText, width: 1.5),
+              borderRadius: BorderRadius.circular(15),
+              prefix: Icon(Icons.search, color: colorAccent.primaryText),
+              hint: "Search your plants ...",
+              fonts: Fonts.defaultFontExtraLight,
+              textColor: colorAccent.primaryText,
+              onChanged: _onSearchChanged, // ✅ use the fixed handler
+            ),
+          ],
+        ),
 
-          Expanded(
+        Expanded(
+          child: UtilRefresh(
+            onRefresh: () async {
+              await Future.wait([_loadGarden()]);
+            },
             child:
                 _filteredList
                     .isNotEmpty // ✅ use _filteredList for display
@@ -123,8 +123,8 @@ class _GardenScreenState extends State<GardenScreen> {
                     ),
                   ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

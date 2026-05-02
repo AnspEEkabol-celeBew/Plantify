@@ -77,10 +77,7 @@ class _UtilRefreshState extends State<UtilRefresh>
       color: widget.color ?? colorAccent.secondary,
       backgroundColor: widget.backgroundColor ?? colorAccent.cardLight,
       strokeWidth: 2.5,
-      child: FadeTransition(
-        opacity: _fadeAnimation,
-        child: widget.child,
-      ),
+      child: widget.child,
     );
   }
 }

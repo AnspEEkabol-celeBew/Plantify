@@ -79,18 +79,15 @@ class _ReminderScreenState extends State<ReminderScreen> {
     }).toList();
   }
 
-  bool _hasReminderOnDay(DateTime day) =>
-      _remindersForDay(day).isNotEmpty;
+  bool _hasReminderOnDay(DateTime day) => _remindersForDay(day).isNotEmpty;
 
   void _openAddReminder() {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => AddReminderSheet(
-        initialDate: _selectedDay,
-        onSave: _saveReminder,
-      ),
+      builder: (_) =>
+          AddReminderSheet(initialDate: _selectedDay, onSave: _saveReminder),
     );
   }
 
@@ -110,7 +107,7 @@ class _ReminderScreenState extends State<ReminderScreen> {
   }
 
   int findReminderIndex(List<dynamic> reminderList, String reminderId) {
-    for (int l=0;l<reminderList.length;l++) {
+    for (int l = 0; l < reminderList.length; l++) {
       if (reminderList[l]['rid'] == reminderId) {
         return l;
       }
@@ -160,7 +157,9 @@ class _ReminderScreenState extends State<ReminderScreen> {
       duration: 2000,
       animationDuration: 200,
       color: colorAccent.cardDark,
-      boxShadow: [BoxShadow(color: Color.fromRGBO(0, 0, 0, 0.3), blurRadius: 5)],
+      boxShadow: [
+        BoxShadow(color: Color.fromRGBO(0, 0, 0, 0.3), blurRadius: 5),
+      ],
       width: 300,
       content: UtilText(
         message,
@@ -184,11 +183,7 @@ class _ReminderScreenState extends State<ReminderScreen> {
         ? "Today"
         : DateFormat('MMMM d, yyyy').format(_selectedDay);
 
-    return UtilRefresh(
-      onRefresh: () async {
-        Future.wait([_loadReminders()]);
-      },
-      child: UtilFlexBox(
+    return UtilFlexBox(
       direction: Axis.vertical,
       margin: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       children: [
@@ -203,8 +198,11 @@ class _ReminderScreenState extends State<ReminderScreen> {
                 UtilContainer(
                   borderRadius: BorderRadius.circular(100),
                   onTap: () => setState(() => utilDate.shift(-1)),
-                  child: Icon(Icons.navigate_before_rounded,
-                      color: colorAccent.primaryText, size: 40),
+                  child: Icon(
+                    Icons.navigate_before_rounded,
+                    color: colorAccent.primaryText,
+                    size: 40,
+                  ),
                 ),
                 Expanded(
                   child: UtilText(
@@ -218,8 +216,11 @@ class _ReminderScreenState extends State<ReminderScreen> {
                 UtilContainer(
                   borderRadius: BorderRadius.circular(100),
                   onTap: () => setState(() => utilDate.shift(1)),
-                  child: Icon(Icons.navigate_next_rounded,
-                      color: colorAccent.primaryText, size: 40),
+                  child: Icon(
+                    Icons.navigate_next_rounded,
+                    color: colorAccent.primaryText,
+                    size: 40,
+                  ),
                 ),
               ],
             ),
@@ -310,7 +311,7 @@ class _ReminderScreenState extends State<ReminderScreen> {
                 ),
         ),
       ],
-    ));
+    );
   }
 
   // ── Build interactive calendar grid ───────────────────────────────────────
@@ -325,11 +326,7 @@ class _ReminderScreenState extends State<ReminderScreen> {
 
     final headerWidgets = List.generate(
       headers.length,
-      (i) => _CalendarCell(
-        label: headers[i],
-        isHeader: true,
-        isSunday: i == 0,
-      ),
+      (i) => _CalendarCell(label: headers[i], isHeader: true, isSunday: i == 0),
     );
 
     final calData = generateCalendarData(year, month);
@@ -406,9 +403,7 @@ class _CalendarCell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textColor = isSunday
-        ? colorAccent.sunday
-        : colorAccent.primaryText;
+    final textColor = isSunday ? colorAccent.sunday : colorAccent.primaryText;
 
     return GestureDetector(
       onTap: onTap,
@@ -428,8 +423,8 @@ class _CalendarCell extends StatelessWidget {
                   color: isToday
                       ? colorAccent.primary
                       : isSelected
-                          ? colorAccent.cardDark
-                          : Colors.transparent,
+                      ? colorAccent.cardDark
+                      : Colors.transparent,
                 ),
                 alignment: Alignment.center,
                 child: UtilText(
@@ -438,9 +433,7 @@ class _CalendarCell extends StatelessWidget {
                   family: isHeader
                       ? Fonts.defaultFontMedium
                       : Fonts.defaultFontThin,
-                  color: isToday
-                      ? colorAccent.white
-                      : textColor,
+                  color: isToday ? colorAccent.white : textColor,
                 ),
               ),
 
@@ -480,12 +473,7 @@ class _ReminderItem extends StatelessWidget {
 
     return UtilFlexBox(
       padding: EdgeInsets.all(6),
-      border: Border(
-        left: BorderSide(
-          color: colorAccent.secondary,
-          width: 10,
-        ),
-      ),
+      border: Border(left: BorderSide(color: colorAccent.secondary, width: 10)),
       borderRadius: BorderRadius.circular(10),
       color: colorAccent.cardLight,
       width: double.maxFinite,
@@ -539,11 +527,7 @@ class _ReminderItem extends StatelessWidget {
 // ─────────────────────────────────────────────────────────────────────────────
 
 class AddReminderSheet extends StatefulWidget {
-  const AddReminderSheet({
-    super.key,
-    required this.onSave,
-    this.initialDate,
-  });
+  const AddReminderSheet({super.key, required this.onSave, this.initialDate});
 
   final Future<void> Function(Map<String, dynamic> entry) onSave;
   final DateTime? initialDate;
@@ -596,8 +580,7 @@ class _AddReminderSheetState extends State<AddReminderSheet> {
     return "$hour:$min $period";
   }
 
-  String _formatDate(DateTime d) =>
-      DateFormat('MMM d').format(d);
+  String _formatDate(DateTime d) => DateFormat('MMM d').format(d);
 
   Future<void> _pickDate() async {
     final picked = await showDatePicker(
@@ -692,17 +675,11 @@ class _AddReminderSheetState extends State<AddReminderSheet> {
 
             // ── Start Date ───────────────────────────────────────────────
             _FieldLabel("Start Date"),
-            _TapField(
-              label: _formatDate(_selectedDate),
-              onTap: _pickDate,
-            ),
+            _TapField(label: _formatDate(_selectedDate), onTap: _pickDate),
 
             // ── Time ─────────────────────────────────────────────────────
             _FieldLabel("Time"),
-            _TapField(
-              label: _formatTime(_selectedTime),
-              onTap: _pickTime,
-            ),
+            _TapField(label: _formatTime(_selectedTime), onTap: _pickTime),
 
             // ── Repeat ───────────────────────────────────────────────────
             _FieldLabel("Repeat"),
@@ -812,8 +789,10 @@ class _DropdownField extends StatelessWidget {
             fontSize: 16,
             color: colorAccent.primaryText,
           ),
-          icon: Icon(Icons.keyboard_arrow_down_rounded,
-              color: colorAccent.primaryText),
+          icon: Icon(
+            Icons.keyboard_arrow_down_rounded,
+            color: colorAccent.primaryText,
+          ),
           items: items
               .map((e) => DropdownMenuItem(value: e, child: Text(e)))
               .toList(),
@@ -850,8 +829,10 @@ class _TapField extends StatelessWidget {
               color: colorAccent.primaryText,
             ),
           ),
-          Icon(Icons.keyboard_arrow_down_rounded,
-              color: colorAccent.primaryText),
+          Icon(
+            Icons.keyboard_arrow_down_rounded,
+            color: colorAccent.primaryText,
+          ),
         ],
       ),
     );
