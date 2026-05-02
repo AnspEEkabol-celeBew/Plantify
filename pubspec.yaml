@@ -55,6 +55,7 @@ dependencies:
   share_plus: ^7.2.0
   supabase_flutter: ^2.12.4
   flutter_image_compress: ^2.4.0
+  internet_connection_checker_plus: ^3.0.0
 
 dev_dependencies:
   flutter_test:

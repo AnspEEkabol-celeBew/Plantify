@@ -15,6 +15,8 @@ import '../../util/snackbar.dart';
 import '../../util/text.dart';
 import '../../util/worldmap.dart';
 
+import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
+
 class PlantInfoScreen extends StatefulWidget {
   const PlantInfoScreen({super.key, required this.plantData});
 
@@ -26,6 +28,7 @@ class PlantInfoScreen extends StatefulWidget {
 
 class _PlantInfoScreenState extends State<PlantInfoScreen> {
   late final Map<String, dynamic> plant = widget.plantData;
+  final InternetConnection internetConnection = InternetConnection();
 
   bool isInGarden(List<dynamic> gardenList, String plantId) {
     for (int l=0;l<gardenList.length;l++) {
@@ -39,6 +42,11 @@ class _PlantInfoScreenState extends State<PlantInfoScreen> {
   void addPlantToGarden() async {
     Map<String, dynamic> userDataTemp = await loadPreferencesOnMap('userData',{});
     List<dynamic> plantList = json.decode(userDataTemp['garden']);
+
+    if (!(await internetConnection.hasInternetAccess)) {
+      showSnackBar("No Internet Connection");
+      return;
+    }
     
     debugPrint(plant['id']);
 

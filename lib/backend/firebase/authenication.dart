@@ -30,6 +30,8 @@ class FirebaseAuthService {
     switch (e.code) {
       case 'email-already-in-use':
         return "Email already exists.";
+      case 'network-request-failed':
+        return "No Internet Connection";
       case 'invalid-email':
         return "Invalid email format.";
       case 'weak-password':

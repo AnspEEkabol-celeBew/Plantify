@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 
 class FirestoreService {
   final FirebaseFirestore db = FirebaseFirestore.instance;

@@ -13,6 +13,7 @@ import 'package:plantify/util/image.dart';
 import 'package:plantify/util/layout.dart';
 import 'package:plantify/util/snackbar.dart';
 import 'package:plantify/util/text.dart';
+import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 
 import 'add_journal.dart';
 
@@ -31,6 +32,7 @@ class _MyPlantScreenState extends State<MyPlantScreen>
   late TabController _tabController;
   late Map<String, dynamic> plant;
   late List<dynamic> journalList;
+  final InternetConnection internetConnection = InternetConnection();
 
   @override
   void initState() {
@@ -65,6 +67,10 @@ class _MyPlantScreenState extends State<MyPlantScreen>
   }
 
   Future<void> _saveJournal(Map<String, dynamic> entry) async {
+    if (!(await internetConnection.hasInternetAccess)) {
+      _showSnackBar("No Internet Connection");
+      return;
+    }
     Map<String, dynamic> userData = await loadPreferencesOnMap('userData', {});
     List<dynamic> gardenList = json.decode(userData['garden']);
 
@@ -94,6 +100,10 @@ class _MyPlantScreenState extends State<MyPlantScreen>
   // ─── Delete Journal ───────────────────────────────────────────────────────
 
   Future<void> _deleteJournal(int index) async {
+    if (!(await internetConnection.hasInternetAccess)) {
+      _showSnackBar("No Internet Connection");
+      return;
+    }
     Map<String, dynamic> userData = await loadPreferencesOnMap('userData', {});
     List<dynamic> gardenList = json.decode(userData['garden']);
 

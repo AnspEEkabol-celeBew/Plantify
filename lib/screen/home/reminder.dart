@@ -9,9 +9,11 @@ import 'package:plantify/theme/fonts.dart';
 import 'package:plantify/util/container.dart';
 import 'package:plantify/util/date.dart';
 import 'package:plantify/util/layout.dart';
+import 'package:plantify/util/refresh.dart';
 import 'package:plantify/util/snackbar.dart';
 import 'package:plantify/util/text.dart';
 import 'package:uuid/uuid.dart';
+import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 
 import '../../util/miscellaneous.dart';
 
@@ -31,6 +33,7 @@ class _ReminderScreenState extends State<ReminderScreen> {
     DateTime.now().month,
     DateTime.now().day,
   );
+  final InternetConnection internetConnection = InternetConnection();
 
   @override
   void initState() {
@@ -92,6 +95,10 @@ class _ReminderScreenState extends State<ReminderScreen> {
   }
 
   Future<void> _saveReminder(Map<String, dynamic> entry) async {
+    if (!(await internetConnection.hasInternetAccess)) {
+      _showSnackBar("No Internet Connection");
+      return;
+    }
     final userData = await loadPreferencesOnMap('userData', {});
     final List<dynamic> list = json.decode(userData['reminder'] ?? '[]');
     list.add(entry);
@@ -112,6 +119,10 @@ class _ReminderScreenState extends State<ReminderScreen> {
   }
 
   Future<void> _deleteReminder(int index) async {
+    if (!(await internetConnection.hasInternetAccess)) {
+      _showSnackBar("No Internet Connection");
+      return;
+    }
     final userData = await loadPreferencesOnMap('userData', {});
     final List<dynamic> list = json.decode(userData['reminder'] ?? '[]');
 
@@ -173,7 +184,11 @@ class _ReminderScreenState extends State<ReminderScreen> {
         ? "Today"
         : DateFormat('MMMM d, yyyy').format(_selectedDay);
 
-    return UtilFlexBox(
+    return UtilRefresh(
+      onRefresh: () async {
+        Future.wait([_loadReminders()]);
+      },
+      child: UtilFlexBox(
       direction: Axis.vertical,
       margin: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       children: [
@@ -295,7 +310,7 @@ class _ReminderScreenState extends State<ReminderScreen> {
                 ),
         ),
       ],
-    );
+    ));
   }
 
   // ── Build interactive calendar grid ───────────────────────────────────────

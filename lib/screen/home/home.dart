@@ -16,6 +16,7 @@ import '../../main.dart';
 import '../../storage/plants.dart';
 import '../../theme/fonts.dart';
 import '../../util/image.dart';
+import '../../util/refresh.dart';
 import '../article/article_screen.dart';
 import '../article/article_services.dart';
 
@@ -78,402 +79,117 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  // void _showArticleOptions(BuildContext context, ArticleData article) {
-  //   showModalBottomSheet(
-  //     context: context,
-  //     backgroundColor: colorAccent.background,
-  //     shape: const RoundedRectangleBorder(
-  //       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-  //     ),
-  //     builder: (_) => Padding(
-  //       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-  //       child: Column(
-  //         mainAxisSize: MainAxisSize.min,
-  //         children: [
-  //           ListTile(
-  //             leading: Icon(Icons.bookmark_border_rounded, color: colorAccent.primaryText),
-  //             title: UtilText('Save Article', family: Fonts.defaultFontRegular, color: colorAccent.primaryText),
-  //             onTap: () {
-  //               Navigator.pop(context);
-  //               debugPrint('save ${article.id}');
-  //             },
-  //           ),
-  //           ListTile(
-  //             leading: Icon(Icons.share_rounded, color: colorAccent.primaryText),
-  //             title: UtilText('Share', family: Fonts.defaultFontRegular, color: colorAccent.primaryText),
-  //             onTap: () {
-  //               Navigator.pop(context);
-  //               Share.share('${article.title}\n\n${article.sourceUrl}');
-  //             },
-  //           ),
-  //         ],
-  //       ),
-  //     ),
-  //   );
-  // }
-
-
   @override
   Widget build(BuildContext context) {
-    final String username  = _userData['username'] as String? ?? '';
+    final String username = _userData['username'] as String? ?? '';
     final String email = _userData['email'] as String? ?? '';
     final int age = _userData['age'] as int? ?? 0;
 
-    return SingleChildScrollView(
-      child: UtilFlexBox(
-        gap: 5,
-        children: [
-          //header
-          UtilFlexBox(
-            margin: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-            gap: 5,
-            children: [
-              UtilText(
-                "Hi $username",
-                size: 38,
-                family: Fonts.defaultFontSemiBold,
-                color: colorAccent.primaryText,
-              ),
-              UtilText(
-                "Let's keep your plants healthy today!",
-                size: 18,
-                family: Fonts.defaultFontThin,
-                color: colorAccent.secondaryText,
-              ),
-            ],
-          ),
+    return UtilRefresh(
+      onRefresh: () async {
+        await Future.wait([
+          _loadUserData(),
+          _loadWeather(),
+          _loadArticles(),
+        ]);
+      },
+      child: SingleChildScrollView(
+        child: UtilFlexBox(
+          gap: 5,
+          children: [
+            //header
+            UtilFlexBox(
+              margin: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              gap: 5,
+              children: [
+                UtilText(
+                  "Hi $username",
+                  size: 38,
+                  family: Fonts.defaultFontSemiBold,
+                  color: colorAccent.primaryText,
+                ),
+                UtilText(
+                  "Let's keep your plants healthy today!",
+                  size: 18,
+                  family: Fonts.defaultFontThin,
+                  color: colorAccent.secondaryText,
+                ),
+              ],
+            ),
 
-          //weather
-          // UtilFlexBox(
-          //   margin: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-          //   gap: 10,
-          //   children: [
-          //     UtilText(
-          //       "Weather Today",
-          //       color: colorAccent.primaryText,
-          //       family: Fonts.defaultFontMedium,
-          //       size: 20,
-          //     ),
-          //     UtilFlexBox(
-          //       main: MainAxisAlignment.center,
-          //       padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-          //       direction: Axis.horizontal,
-          //       width: double.infinity,
-          //       height: 130,
-          //       color: colorAccent.cardLight,
-          //       borderRadius: BorderRadius.circular(10.0),
-          //       children: [
-          //         Expanded(
-          //           child: UtilFlexBox(
-          //             direction: Axis.vertical,
-          //             children: [
-          //               UtilText(
-          //                 "Ipil, Philippines",
-          //                 size: 16,
-          //                 prefix: Icon(Icons.location_on, color: colorAccent.primaryText),
-          //                 family: Fonts.defaultFontExtraLight,
-          //                 color: colorAccent.primaryText,
-          //               ),
-          //               UtilText(
-          //                 "67 °C",
-          //                 size: 40,
-          //                 family: Fonts.defaultFontMedium,
-          //                 color: colorAccent.primaryText,
-          //               ),
-          //               UtilText(
-          //                 "Humidity 67%",
-          //                 size: 15,
-          //                 family: Fonts.defaultFontExtraLight,
-          //                 color: colorAccent.primaryText,
-          //               ),
-          //             ],
-          //           ),
-          //         ),
-          //         SvgPicture.asset(
-          //           'assets/images/icons/svg/sunny.svg',
-          //           colorFilter: ColorFilter.mode(colorAccent.secondary, BlendMode.srcIn)
-          //         )
-          //       ],
-          //     ),
-          //   ],
-          // ),
-          HomeWeatherCard(
-            weatherData: _weatherData,
-            loading: _weatherLoading,
-          ),
+            HomeWeatherCard(
+              weatherData: _weatherData,
+              loading: _weatherLoading,
+            ),
 
-          //article
-          // UtilFlexBox(
-          //   direction: Axis.vertical,
-          //   margin: EdgeInsets.symmetric(horizontal: 0, vertical: 10),
-          //   gap: 5,
-          //   children: [
-          //     UtilFlexBox(
-          //       direction: Axis.horizontal,
-          //       cross: CrossAxisAlignment.end,
-          //       margin: EdgeInsets.symmetric(horizontal: 20, vertical: 0),
-          //       children: [
-          //         Expanded(
-          //           child: UtilText(
-          //             "Popular Articles",
-          //             family: Fonts.defaultFontMedium,
-          //             size: 20,
-          //             color: colorAccent.primaryText,
-          //           ),
-          //         ),
-          //         UtilFlexBox(
-          //           onTap: () => debugPrint("more"),
-          //           borderRadius: BorderRadius.circular(100),
-          //           cross: CrossAxisAlignment.center,
-          //           direction: Axis.horizontal,
-          //           gap: 5,
-          //           children: [
-          //             UtilText(
-          //               "View All",
-          //               size: 18,
-          //               family: Fonts.defaultFontExtraLight,
-          //               color: colorAccent.secondary,
-          //             ),
-          //             Icon(
-          //               Icons.arrow_forward_rounded,
-          //               size: 18,
-          //               color: colorAccent.secondary,
-          //             ),
-          //           ],
-          //         ),
-          //       ],
-          //     ),
-          //     SingleChildScrollView(
-          //       scrollDirection: Axis.horizontal,
-          //       child: UtilFlexBox(
-          //         margin: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-          //         height: 220,
-          //         direction: Axis.horizontal,
-          //         gap: 15,
-          //         children: List.generate(
-          //           10,
-          //           (ind) => UtilFlexBox(
-          //             onTap: () => {debugPrint("art ${ind + 1}")},
-          //             borderRadius: BorderRadius.circular(15),
-          //             gap: 8,
-          //             direction: Axis.vertical,
-          //             width: 220,
-          //             height: double.maxFinite,
-          //             children: [
-          //               UtilFitImage(
-          //                 'assets/images/util/article_image_sample.jpg',
-          //                 height: 150,
-          //                 borderRadius: BorderRadius.circular(15),
-          //                 width: double.maxFinite,
-          //                 fit: BoxFit.cover,
-          //               ),
-          //               UtilFlexBox(
-          //                 direction: Axis.horizontal,
-          //                 children: [
-          //                   Expanded(
-          //                     child: UtilText(
-          //                       "Sample Article ${ind + 1} Sample Article ${ind + 1}",
-          //                       family: Fonts.defaultFontExtraLight,
-          //                       size: 16,
-          //                       color: colorAccent.secondaryText,
-          //                     ),
-          //                   ),
-          //                   UtilContainer(
-          //                     height: 45,
-          //                     width: 30,
-          //                     borderRadius: BorderRadius.circular(100),
-          //                     onTap: () => debugPrint("artset ${ind + 1}"),
-          //                     child: Icon(
-          //                       Icons.more_vert,
-          //                       color: colorAccent.primaryText,
-          //                       size: 24,
-          //                     ),
-          //                   ),
-          //                 ],
-          //               ),
-          //             ],
-          //           ),
-          //         ),
-          //       ),
-          //     ),
-          //   ],
-          // ),
+            _ArticleSection(articles: _articles, isLoading: _articlesLoading),
 
-          _ArticleSection(
-            articles: _articles,
-            isLoading: _articlesLoading,
-          ),
+            //planty
+            // UtilFlexBox(
+            //   onTap: () => {debugPrint("planty")},
+            //   margin: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+            //   padding: EdgeInsets.all(5),
+            //   width: double.maxFinite,
+            //   borderRadius: BorderRadius.circular(10),
+            //   direction: Axis.horizontal,
+            //   height: 150,
+            //   color: colorAccent.cardLight,
+            //   children: [
+            //     Image.asset('assets/images/misc/planty.png'),
+            //     Expanded(
+            //       child: UtilFlexBox(
+            //         padding: EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+            //         direction: Axis.vertical,
+            //         gap: 10,
+            //         children: [
+            //           UtilText(
+            //             "Ask Planty",
+            //             size: 25,
+            //             family: Fonts.defaultFontMedium,
+            //             color: colorAccent.primaryText,
+            //           ),
+            //           UtilText(
+            //             "Our Planty is ready to help with your plant related problems and more!",
+            //             size: 15,
+            //             family: Fonts.defaultFontThin,
+            //             color: colorAccent.secondaryText,
+            //           ),
+            //         ],
+            //       ),
+            //     ),
+            //   ],
+            // ),
 
-          // UtilFlexBox(
-          //   direction: Axis.vertical,
-          //   margin: EdgeInsets.symmetric(horizontal: 0, vertical: 10),
-          //   gap: 5,
-          //   children: [
-          //     UtilFlexBox(
-          //       direction: Axis.horizontal,
-          //       cross: CrossAxisAlignment.end,
-          //       margin: EdgeInsets.symmetric(horizontal: 20, vertical: 0),
-          //       children: [
-          //         Expanded(
-          //           child: UtilText(
-          //             "Popular Articles",
-          //             family: Fonts.defaultFontMedium,
-          //             size: 20,
-          //             color: colorAccent.primaryText,
-          //           ),
-          //         )
-          //       ],
-          //     ),
-          //     if (_articles.isEmpty)
-          //       // Loading shimmer / placeholder
-          //       SingleChildScrollView(
-          //         scrollDirection: Axis.horizontal,
-          //         child: UtilFlexBox(
-          //           margin: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-          //           height: 220,
-          //           direction: Axis.horizontal,
-          //           gap: 15,
-          //           children: List.generate(
-          //             3,
-          //             (_) => Container(
-          //               width: 220,
-          //               decoration: BoxDecoration(
-          //                 color: colorAccent.cardLight,
-          //                 borderRadius: BorderRadius.circular(15),
-          //               ),
-          //             ),
-          //           ),
-          //         ),
-          //       )
-          //     else
-          //       SingleChildScrollView(
-          //         scrollDirection: Axis.horizontal,
-          //         child: UtilFlexBox(
-          //           margin: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-          //           height: 220,
-          //           direction: Axis.horizontal,
-          //           gap: 15,
-          //           children: _articles.map((article) {
-          //             return UtilFlexBox(
-          //               onTap: () => navigateTo(
-          //                 context,
-          //                 animationType: NavAnimation.slideUp,
-          //                 duration: preferredAnimations.getDuration(),
-          //                 page: ArticleScreen(article: article),
-          //               ),
-          //               borderRadius: BorderRadius.circular(15),
-          //               gap: 8,
-          //               direction: Axis.vertical,
-          //               width: 220,
-          //               height: double.maxFinite,
-          //               children: [
-          //                 UtilFitImage(
-          //                   article.imageUrl,
-          //                   height: 150,
-          //                   borderRadius: BorderRadius.circular(15),
-          //                   width: double.maxFinite,
-          //                   fit: BoxFit.cover,
-          //                 ),
-          //                 UtilFlexBox(
-          //                   direction: Axis.horizontal,
-          //                   children: [
-          //                     Expanded(
-          //                       child: UtilText(
-          //                         article.title,
-          //                         family: Fonts.defaultFontExtraLight,
-          //                         size: 14,
-          //                         color: colorAccent.secondaryText,
-          //                       ),
-          //                     ),
-          //                     UtilContainer(
-          //                       height: 45,
-          //                       width: 30,
-          //                       borderRadius: BorderRadius.circular(100),
-          //                       onTap: () => _showArticleOptions(context, article),
-          //                       child: Icon(
-          //                         Icons.more_vert,
-          //                         color: colorAccent.primaryText,
-          //                         size: 24,
-          //                       ),
-          //                     ),
-          //                   ],
-          //                 ),
-          //               ],
-          //             );
-          //           }).toList(),
-          //         ),
-          //       ),
-          //   ],
-          // ),
-
-          //planty
-          // UtilFlexBox(
-          //   onTap: () => {debugPrint("planty")},
-          //   margin: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-          //   padding: EdgeInsets.all(5),
-          //   width: double.maxFinite,
-          //   borderRadius: BorderRadius.circular(10),
-          //   direction: Axis.horizontal,
-          //   height: 150,
-          //   color: colorAccent.cardLight,
-          //   children: [
-          //     Image.asset('assets/images/misc/planty.png'),
-          //     Expanded(
-          //       child: UtilFlexBox(
-          //         padding: EdgeInsets.symmetric(horizontal: 8, vertical: 10),
-          //         direction: Axis.vertical,
-          //         gap: 10,
-          //         children: [
-          //           UtilText(
-          //             "Ask Planty",
-          //             size: 25,
-          //             family: Fonts.defaultFontMedium,
-          //             color: colorAccent.primaryText,
-          //           ),
-          //           UtilText(
-          //             "Our Planty is ready to help with your plant related problems and more!",
-          //             size: 15,
-          //             family: Fonts.defaultFontThin,
-          //             color: colorAccent.secondaryText,
-          //           ),
-          //         ],
-          //       ),
-          //     ),
-          //   ],
-          // ),
-
-          //explore plants
-          UtilFlexBox(
-            margin: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-            direction: Axis.vertical,
-            gap: 12,
-            children: [
-              UtilText(
-                "Explore Plants",
-                size: 20,
-                family: Fonts.defaultFontMedium,
-                color: colorAccent.primaryText,
-              ),
-              UtilGridBox(
-                childAspectRatio: 1.13,
-                columns: 2,
-                gapX: 10,
-                gapY: 10,
-                children: plants.fromExplorePlants(),
-              ),
-            ],
-          ),
-        ],
+            //explore plants
+            UtilFlexBox(
+              margin: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              direction: Axis.vertical,
+              gap: 12,
+              children: [
+                UtilText(
+                  "Explore Plants",
+                  size: 20,
+                  family: Fonts.defaultFontMedium,
+                  color: colorAccent.primaryText,
+                ),
+                UtilGridBox(
+                  childAspectRatio: 1.13,
+                  columns: 2,
+                  gapX: 10,
+                  gapY: 10,
+                  children: plants.fromExplorePlants(),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
 class _ArticleSection extends StatelessWidget {
-  const _ArticleSection({
-    required this.articles,
-    required this.isLoading,
-  });
+  const _ArticleSection({required this.articles, required this.isLoading});
 
   final List<PlantArticle> articles;
   final bool isLoading;
@@ -563,9 +279,13 @@ class _ArticleCard extends StatelessWidget {
               color: colorAccent.cardLight,
               borderRadius: BorderRadius.circular(15),
               alignment: Alignment.center,
-              child: Icon(Icons.eco_outlined, size: 40, color: colorAccent.secondary),
-            )
-          )
+              child: Icon(
+                Icons.eco_outlined,
+                size: 40,
+                color: colorAccent.secondary,
+              ),
+            ),
+          ),
         ),
 
         // Title + menu
@@ -606,7 +326,7 @@ class _ArticleCard extends StatelessWidget {
                 color: colorAccent.secondary,
                 family: Fonts.defaultFontThin,
                 overflow: TextOverflow.ellipsis,
-              )
+              ),
             ),
           ],
         ),
@@ -626,30 +346,42 @@ class _ArticleCard extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: Icon(Icons.bookmark_outline,
-                  color: colorAccent.primaryText),
-              title: UtilText('Save article',
-                  size: 16,
-                  family: Fonts.defaultFontRegular,
-                  color: colorAccent.primaryText),
+              leading: Icon(
+                Icons.bookmark_outline,
+                color: colorAccent.primaryText,
+              ),
+              title: UtilText(
+                'Save article',
+                size: 16,
+                family: Fonts.defaultFontRegular,
+                color: colorAccent.primaryText,
+              ),
               onTap: () => Navigator.pop(context),
             ),
             ListTile(
-              leading:
-                  Icon(Icons.share_outlined, color: colorAccent.primaryText),
-              title: UtilText('Share',
-                  size: 16,
-                  family: Fonts.defaultFontRegular,
-                  color: colorAccent.primaryText),
+              leading: Icon(
+                Icons.share_outlined,
+                color: colorAccent.primaryText,
+              ),
+              title: UtilText(
+                'Share',
+                size: 16,
+                family: Fonts.defaultFontRegular,
+                color: colorAccent.primaryText,
+              ),
               onTap: () => Navigator.pop(context),
             ),
             ListTile(
-              leading: Icon(Icons.open_in_browser_outlined,
-                  color: colorAccent.primaryText),
-              title: UtilText('Open in browser',
-                  size: 16,
-                  family: Fonts.defaultFontRegular,
-                  color: colorAccent.primaryText),
+              leading: Icon(
+                Icons.open_in_browser_outlined,
+                color: colorAccent.primaryText,
+              ),
+              title: UtilText(
+                'Open in browser',
+                size: 16,
+                family: Fonts.defaultFontRegular,
+                color: colorAccent.primaryText,
+              ),
               onTap: () {
                 Navigator.pop(context);
                 // The detail screen handles URL launching
@@ -664,10 +396,7 @@ class _ArticleCard extends StatelessWidget {
 
 //WIDGET SHORTCUT
 class ExplorePlants extends StatelessWidget {
-  const ExplorePlants({
-    super.key,
-    required this.plantId
-  });
+  const ExplorePlants({super.key, required this.plantId});
 
   final String plantId;
 
@@ -678,7 +407,12 @@ class ExplorePlants extends StatelessWidget {
     return UtilFitImage(
       plantGet?["image_url"],
       onTap: () {
-        navigateTo(context, animationType: NavAnimation.slideUp, duration: preferredAnimations.getDuration(), page: PlantInfoScreen(plantData: plantGet?? {}));
+        navigateTo(
+          context,
+          animationType: NavAnimation.slideUp,
+          duration: preferredAnimations.getDuration(),
+          page: PlantInfoScreen(plantData: plantGet ?? {}),
+        );
       },
       borderRadius: BorderRadius.circular(15),
       width: double.maxFinite,
@@ -689,15 +423,12 @@ class ExplorePlants extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment(0, -2.5),
           end: Alignment(0, 0.4),
-          colors: [
-            Color.fromRGBO(0, 0, 0, 0.8),
-            Color.fromRGBO(0, 0, 0, 0),
-          ],
+          colors: [Color.fromRGBO(0, 0, 0, 0.8), Color.fromRGBO(0, 0, 0, 0)],
         ),
         width: double.maxFinite,
         height: double.maxFinite,
         child: UtilText(
-          plantGet?["plant_name"]?? "null",
+          plantGet?["plant_name"] ?? "null",
           family: Fonts.defaultFontRegular,
           color: colorAccent.white,
           size: 18,
@@ -733,11 +464,11 @@ class HomeWeatherCard extends StatelessWidget {
           onTap: loading || weatherData == null
               ? null
               : () => navigateTo(
-                    context,
-                    animationType: NavAnimation.slideUp,
-                    duration: preferredAnimations.getDuration(),
-                    page: const WeatherScreen(),
-                  ),
+                  context,
+                  animationType: NavAnimation.slideUp,
+                  duration: preferredAnimations.getDuration(),
+                  page: const WeatherScreen(),
+                ),
           main: MainAxisAlignment.center,
           padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
           direction: Axis.horizontal,
@@ -757,38 +488,41 @@ class HomeWeatherCard extends StatelessWidget {
                       ],
                     )
                   : weatherData == null
-                      ? UtilText(
-                          "Weather unavailable",
-                          size: 14,
+                  ? UtilText(
+                      "Weather unavailable",
+                      size: 14,
+                      family: Fonts.defaultFontExtraLight,
+                      color: colorAccent.secondaryText,
+                    )
+                  : UtilFlexBox(
+                      direction: Axis.vertical,
+                      gap: 2,
+                      children: [
+                        UtilText(
+                          weatherData!.locationName,
+                          size: 16,
+                          prefix: Icon(
+                            Icons.location_on,
+                            color: colorAccent.primaryText,
+                            size: 18,
+                          ),
                           family: Fonts.defaultFontExtraLight,
-                          color: colorAccent.secondaryText,
-                        )
-                      : UtilFlexBox(
-                          direction: Axis.vertical,
-                          gap: 2,
-                          children: [
-                            UtilText(
-                              weatherData!.locationName,
-                              size: 16,
-                              prefix: Icon(Icons.location_on,
-                                  color: colorAccent.primaryText, size: 18),
-                              family: Fonts.defaultFontExtraLight,
-                              color: colorAccent.primaryText,
-                            ),
-                            UtilText(
-                              "${weatherData!.today.tempC.round()} °C",
-                              size: 40,
-                              family: Fonts.defaultFontMedium,
-                              color: colorAccent.primaryText,
-                            ),
-                            UtilText(
-                              "Humidity ${weatherData!.today.humidity}%",
-                              size: 15,
-                              family: Fonts.defaultFontExtraLight,
-                              color: colorAccent.primaryText,
-                            ),
-                          ],
+                          color: colorAccent.primaryText,
                         ),
+                        UtilText(
+                          "${weatherData!.today.tempC.round()} °C",
+                          size: 40,
+                          family: Fonts.defaultFontMedium,
+                          color: colorAccent.primaryText,
+                        ),
+                        UtilText(
+                          "Humidity ${weatherData!.today.humidity}%",
+                          size: 15,
+                          family: Fonts.defaultFontExtraLight,
+                          color: colorAccent.primaryText,
+                        ),
+                      ],
+                    ),
             ),
             if (!loading && weatherData != null)
               SvgPicture.asset(
@@ -796,7 +530,9 @@ class HomeWeatherCard extends StatelessWidget {
                 width: 100,
                 height: 100,
                 colorFilter: ColorFilter.mode(
-                    colorAccent.secondary, BlendMode.srcIn),
+                  colorAccent.secondary,
+                  BlendMode.srcIn,
+                ),
               )
             else if (loading)
               _shimmerCircle(size: 75),

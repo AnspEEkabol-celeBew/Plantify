@@ -16,6 +16,7 @@ import 'package:plantify/util/text.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 
 import '../../backend/firestore/firestore.dart';
 import '../../theme/colors.dart';
@@ -32,6 +33,7 @@ class AccountScreen extends StatefulWidget {
 class _AccountScreenState extends State<AccountScreen> {
   Map<String, dynamic> _userData = {};
   bool _isUploadingPhoto = false;
+  final InternetConnection internetConnection = InternetConnection();
 
   @override
   void initState() {
@@ -55,6 +57,10 @@ class _AccountScreenState extends State<AccountScreen> {
   }
 
   Future<void> _pickAndUploadPhoto() async {
+    if (!(await internetConnection.hasInternetAccess)) {
+      _showSnackBar("No Internet. Cannot change profile.");
+      return;
+    }
     final picker = ImagePicker();
     final picked = await picker.pickImage(
       source: ImageSource.gallery,
